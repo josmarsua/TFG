@@ -9,6 +9,7 @@ cap = cv2.VideoCapture("video.mp4")  # For Video
 model = YOLO("best.pt")
  
 classNames = ['Ball', 'Hoop', 'Period', 'Player', 'Ref', 'Shot Clock', 'Team Name', 'Team Points', 'Time Remaining', 'player']
+classes_to_show = ['Ball', 'Hoop', 'Player', 'Ref']
 
 # Definir colores para cada clase
 colors = {
@@ -48,14 +49,15 @@ while True:
             class_id = int(box.cls.item())          # ID de la clase detectada
             class_name = classNames[class_id]       # Nombre de la clase detectada
 
-            # Obtener el color según la clase
-            color = colors.get(class_name, (255, 255, 255))  
+            if class_name in classes_to_show:
+                # Obtener el color según la clase
+                color = colors.get(class_name, (255, 255, 255))  
 
-            # Dibujar el rectángulo con el color correspondiente
-            cv2.rectangle(frame_resized, (x1, y1), (x2, y2), color, 2)
+                # Dibujar el rectángulo con el color correspondiente
+                cv2.rectangle(frame_resized, (x1, y1), (x2, y2), color, 2)
 
-            # Colocar el nombre de la clase y la confianza sobre el rectángulo
-            cvzone.putTextRect(frame_resized, f'{class_name} {conf:.2f}', (x1, y1 - 10), scale=1, thickness=2, colorR=color, offset=5)
+                # Colocar el nombre de la clase y la confianza sobre el rectángulo
+                cvzone.putTextRect(frame_resized, f'{class_name} {conf:.2f}', (x1, y1 - 10), scale=1, thickness=2, colorR=color, offset=5)
 
     # Mostrar el video redimensionado
     cv2.imshow("Basketball Detection", frame_resized)
