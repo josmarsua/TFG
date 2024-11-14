@@ -163,9 +163,7 @@ cython_debug/
 
 
 # Archivos pt
-best.pt
-bestyolo11.pt 
+models/best.pt
 
 # Videos
 emilio.mp4
-video.mp4

@@ -1,71 +1,22 @@
-from ultralytics import YOLO
-import cv2
-import cvzone
-import math
- 
+from utils import read_video, save_video
+from trackers import Tracker
 
-cap = cv2.VideoCapture("video.mp4")  # For Video
- 
-model = YOLO("best.pt")
- 
-classNames = ['Ball', 'Hoop', 'Period', 'Player', 'Ref', 'Shot Clock', 'Team Name', 'Team Points', 'Time Remaining', 'player']
-classes_to_show = ['Ball', 'Hoop', 'Player', 'Ref']
+def main():
+    #Read video
+    video_frames = read_video('emilio.mp4')
 
-# Definir colores para cada clase
-colors = {
-    'Ball': (0, 255, 0),         # Verde
-    'Hoop': (255, 0, 0),         # Azul
-    'Period': (0, 255, 255),     # Amarillo
-    'Player': (255, 165, 0),     # Naranja
-    'Ref': (255, 0, 255),        # Fucsia
-    'Shot Clock': (0, 128, 255), # Naranja claro
-    'Team Name': (0, 0, 255),    # Rojo
-    'Team Points': (128, 0, 128),# Púrpura
-    'Time Remaining': (0, 255, 128) # Verde claro
-}
-
-# Tamaño de la pantalla
-screen_width = 1366  
-screen_height = 768
-
-while True:
-    ret, frame = cap.read()
+    #Initialize Tracker
+    tracker = Tracker('models/best.pt')
     
-    if not ret:
-        break  # Salir si el video termina
+    #Run tracker
+    tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path='stubs/track_stubs.pkl')
 
-    # Redimensionar el frame al tamaño de la pantalla
-    frame_resized = cv2.resize(frame, (screen_width, screen_height))
+    #Draw output
+    ## Draw object tracks
+    output_video_frames = tracker.draw_annotations(video_frames,tracks)
 
-    # Realizar detección en el frame redimensionado
-    results = model(frame_resized)
+    #Save video
+    save_video(output_video_frames, 'output.avi')
 
-    # Obtener las cajas de detección para cada frame
-    for result in results:
-        for box in result.boxes:
-            # Extraer coordenadas y datos de la caja
-            x1, y1, x2, y2 = map(int, box.xyxy[0])  # Coordenadas de la caja
-            conf = box.conf.item()                  # Confianza de la detección
-            class_id = int(box.cls.item())          # ID de la clase detectada
-            class_name = classNames[class_id]       # Nombre de la clase detectada
-
-            if class_name in classes_to_show:
-                # Obtener el color según la clase
-                color = colors.get(class_name, (255, 255, 255))  
-
-                # Dibujar el rectángulo con el color correspondiente
-                cv2.rectangle(frame_resized, (x1, y1), (x2, y2), color, 2)
-
-                # Colocar el nombre de la clase y la confianza sobre el rectángulo
-                cvzone.putTextRect(frame_resized, f'{class_name} {conf:.2f}', (x1, y1 - 10), scale=1, thickness=2, colorR=color, offset=5)
-
-    # Mostrar el video redimensionado
-    cv2.imshow("Basketball Detection", frame_resized)
-
-    # Salir del bucle si se presiona 'q'
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Liberar recursos
-cap.release()
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+    main()
