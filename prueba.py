@@ -4,7 +4,7 @@ import cvzone
 import math
  
 
-cap = cv2.VideoCapture("video.mp4")  # For Video
+cap = cv2.VideoCapture("emilio.mp4")  # For Video
  
 model = YOLO("models/best.pt")
  
