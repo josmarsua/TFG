@@ -6,10 +6,13 @@ import math
 
 cap = cv2.VideoCapture("emilio.mp4")  # For Video
  
-model = YOLO("models/best.pt")
- 
-classNames = ['Ball', 'Hoop', 'Period', 'Player', 'Ref', 'Shot Clock', 'Team Name', 'Team Points', 'Time Remaining', 'player']
-classes_to_show = ['Ball', 'Hoop', 'Player', 'Ref']
+model = YOLO("models/model2.pt")
+
+classNames = ['Ball', 'Player', 'Ref']
+classes_to_show = ['Ball', 'Player', 'Ref']
+
+#classNames = ['Ball', 'Hoop', 'Period', 'Player', 'Ref', 'Shot Clock', 'Team Name', 'Team Points', 'Time Remaining', 'player']
+#classes_to_show = ['Ball', 'Hoop', 'Player', 'Ref']
 
 # Definir colores para cada clase
 colors = {
