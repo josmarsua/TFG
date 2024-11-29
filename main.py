@@ -4,10 +4,10 @@ from team_assigner import TeamAssigner
 
 def main():
     #Read video
-    video_frames = read_video('acb.mp4')
+    video_frames = read_video('nbashort.mp4')
 
     #Initialize Tracker
-    tracker = Tracker('models/best.pt')
+    tracker = Tracker('models/aisport.pt')
     
     #Run tracker
     tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path='stubs/track_stubs.pkl')

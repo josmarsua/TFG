@@ -165,9 +165,11 @@ cython_debug/
 # Archivos pt
 models/best.pt
 models/model2.pt
+models/aisport.pt
 
 # Videos
 emilio.mp4
 video2.mp4
 nba.mp4
+nbashort.mp4
 acb.mp4

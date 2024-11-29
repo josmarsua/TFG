@@ -56,17 +56,17 @@ class Tracker:
                 class_id = frame_detection[3]
                 track_id = frame_detection[4]
 
-                if class_id == class_names_inverse['Player']:
+                if class_id == class_names_inverse['player']:
                     tracks["players"][frame_num][track_id] = {"bbox":bounding_box}
 
-                if class_id == class_names_inverse['Ref']:
+                if class_id == class_names_inverse['referee']:
                     tracks["referees"][frame_num][track_id] = {"bbox":bounding_box}
             
             for frame_detection in detection_sv:
                 bounding_box = frame_detection[0].tolist()
                 class_id = frame_detection[3]
                 
-                if class_id == class_names_inverse['Ball']:
+                if class_id == class_names_inverse['basketball']:
                     tracks["ball"][frame_num][1] = {"bbox":bounding_box} #Solo hay un balon
 
         if stub_path is not None:

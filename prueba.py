@@ -1,74 +1,55 @@
-from ultralytics import YOLO
 import cv2
-import cvzone
-import math
- 
+import torch
+from ultralytics import YOLO
 
-cap = cv2.VideoCapture("emilio.mp4")  # For Video
- 
-model = YOLO("models/model2.pt")
+# Cargar el modelo YOLO
+model_path = "models/aisport.pt"  # Reemplaza con la ruta de tu modelo .pt
+model = YOLO(model_path)
 
-classNames = ['Ball', 'Player', 'Ref']
-classes_to_show = ['Ball', 'Player', 'Ref']
+# Clases del modelo
+class_names = ['basketball', 'net', 'player', 'referee']
 
-#classNames = ['Ball', 'Hoop', 'Period', 'Player', 'Ref', 'Shot Clock', 'Team Name', 'Team Points', 'Time Remaining', 'player']
-#classes_to_show = ['Ball', 'Hoop', 'Player', 'Ref']
+# Configurar la fuente de video (cámara o archivo)
+video_source = "emilio.mp4"  # Reemplaza con la ruta de un archivo de video si no usas cámara
+cap = cv2.VideoCapture(video_source)
 
-# Definir colores para cada clase
-colors = {
-    'Ball': (0, 255, 0),         # Verde
-    'Hoop': (255, 0, 0),         # Azul
-    'Period': (0, 255, 255),     # Amarillo
-    'Player': (255, 165, 0),     # Naranja
-    'Ref': (255, 0, 255),        # Fucsia
-    'Shot Clock': (0, 128, 255), # Naranja claro
-    'Team Name': (0, 0, 255),    # Rojo
-    'Team Points': (128, 0, 128),# Púrpura
-    'Time Remaining': (0, 255, 128) # Verde claro
-}
+# Función para dibujar las cajas y nombres
+def draw_predictions(frame, results):
+    for result in results:
+        boxes = result.boxes.xyxy.cpu().numpy()  # Coordenadas de las cajas (x1, y1, x2, y2)
+        confidences = result.boxes.conf.cpu().numpy()  # Confianza de cada detección
+        class_ids = result.boxes.cls.cpu().numpy().astype(int)  # IDs de las clases
 
-# Tamaño de la pantalla
-screen_width = 1366  
-screen_height = 768
+        for box, conf, class_id in zip(boxes, confidences, class_ids):
+            x1, y1, x2, y2 = map(int, box)
+            label = f"{class_names[class_id]}: {conf:.2f}"
+            color = (0, 255, 0)  # Color de la caja (verde)
 
+            # Dibujar la caja y el texto
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+# Loop de captura y detección
 while True:
     ret, frame = cap.read()
-    
     if not ret:
-        break  # Salir si el video termina
+        break
 
-    # Redimensionar el frame al tamaño de la pantalla
-    frame_resized = cv2.resize(frame, (screen_width, screen_height))
+    # Realizar la detección
+    results = model(frame)  # Inferencia directa sobre el frame
 
-    # Realizar detección en el frame redimensionado
-    results = model(frame_resized)
+    # Dibujar resultados
+    draw_predictions(frame, results)
 
-    # Obtener las cajas de detección para cada frame
-    for result in results:
-        for box in result.boxes:
-            # Extraer coordenadas y datos de la caja
-            x1, y1, x2, y2 = map(int, box.xyxy[0])  # Coordenadas de la caja
-            conf = box.conf.item()                  # Confianza de la detección
-            class_id = int(box.cls.item())          # ID de la clase detectada
-            class_name = classNames[class_id]       # Nombre de la clase detectada
+    # Mostrar el frame procesado
+    cv2.imshow('YOLO Detections', frame)
 
-            if class_name in classes_to_show:
-                # Obtener el color según la clase
-                color = colors.get(class_name, (255, 255, 255))  
-
-                # Dibujar el rectángulo con el color correspondiente
-                cv2.rectangle(frame_resized, (x1, y1), (x2, y2), color, 2)
-
-                # Colocar el nombre de la clase y la confianza sobre el rectángulo
-                cvzone.putTextRect(frame_resized, f'{class_name} {conf:.2f}', (x1, y1 - 10), scale=1, thickness=2, colorR=color, offset=5)
-
-    # Mostrar el video redimensionado
-    cv2.imshow("Basketball Detection", frame_resized)
-
-    # Salir del bucle si se presiona 'q'
+    # Salir con la tecla 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 # Liberar recursos
 cap.release()
 cv2.destroyAllWindows()
+
+ 
