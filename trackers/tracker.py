@@ -8,6 +8,7 @@ import cv2
 import sys
 sys.path.append('../')
 from utils import get_width_of_bbox, get_center_of_bbox
+from scipy.interpolate import CubicSpline
 
 class Tracker:
     def __init__(self, model_path):
@@ -174,14 +175,30 @@ class Tracker:
         return output_video_frames
                 
     #Seguimiento de la posicion de la pelota (evitar frames en las que no se detecta)
-    def interpolate_ball_positions(self,ball_positions):
-        ball_positions = [x.get(1,{}).get('bbox',[]) for x in ball_positions]
-        df_ball_positions = pd.DataFrame(ball_positions,columns=['x1','y1','x2','y2'])
 
-        #Interpolate missing values
-        df_ball_positions = df_ball_positions.interpolate()
-        df_ball_positions = df_ball_positions.bfill()
+    def interpolate_ball_positions(self, ball_positions):
+        # Extraer las posiciones del balón (x1, y1, x2, y2)
+        ball_positions = [x.get(1, {}).get('bbox', []) for x in ball_positions]
+        df_ball_positions = pd.DataFrame(ball_positions, columns=['x1', 'y1', 'x2', 'y2'])
 
-        ball_positions = [{1: {"bbox": x}}for x in df_ball_positions.to_numpy().tolist()]
+        # Índices donde las posiciones del balón están disponibles
+        valid_indices = df_ball_positions.dropna().index.to_numpy()
+        missing_indices = df_ball_positions[df_ball_positions.isna().any(axis=1)].index.to_numpy()
 
+        if len(valid_indices) < 2:  # No hay suficiente información para interpolar
+            return [{1: {"bbox": [0, 0, 0, 0]}} for _ in ball_positions]
+
+        # Interpolación cúbica para cada columna (x1, y1, x2, y2)
+        interpolated_positions = df_ball_positions.copy()
+        for col in df_ball_positions.columns:
+            valid_values = df_ball_positions[col].dropna().to_numpy()
+            if len(valid_values) >= 2:  # Necesita al menos dos puntos válidos
+                spline = CubicSpline(valid_indices, valid_values, bc_type='natural')
+                interpolated_positions.loc[missing_indices, col] = spline(missing_indices)
+
+        # Rellenar valores faltantes al principio o al final (si es necesario)
+        interpolated_positions = interpolated_positions.bfill().ffill()
+
+        # Reconstruir el formato original
+        ball_positions = [{1: {"bbox": x}} for x in interpolated_positions.to_numpy().tolist()]
         return ball_positions
