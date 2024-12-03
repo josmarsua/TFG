@@ -148,6 +148,23 @@ class Tracker:
         
         return frame
     
+    def draw_circle(self, frame, bbox, color):
+        """
+        Dibuja un círculo alrededor del balón basado en su bbox.
+        """
+        # Calcular el centro del bounding box
+        x1, y1, x2, y2 = map(int, bbox)
+        center_x = (x1 + x2) // 2
+        center_y = (y1 + y2) // 2
+
+        # Calcular el radio como la mitad de la mayor dimensión del bounding box
+        radius = max((x2 - x1) // 2, (y2 - y1) // 2)
+
+        # Dibujar el círculo
+        cv2.circle(frame, (center_x, center_y), radius, color, thickness=2)
+
+        return frame
+
     def draw_annotations(self,video_frames,tracks):
         output_video_frames = []
         for frame_num, frame in enumerate(video_frames):
@@ -168,7 +185,8 @@ class Tracker:
 
             # Draw Ball
             for _, ball in ball_dict.items():
-                frame = self.draw_triangle(frame,ball["bbox"],(0,255,0))
+                frame = self.draw_triangle(frame,ball["bbox"],(0,255,0)) 
+                frame = self.draw_circle(frame,ball["bbox"],(0,255,0))
 
             output_video_frames.append(frame)
 
