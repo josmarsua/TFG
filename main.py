@@ -2,10 +2,20 @@ from utils import read_video, save_video
 from trackers import Tracker
 from team_assigner import TeamAssigner
 import cv2
+from utils import draw_trajectories, calculate_homography, select_points
+
 
 def main():
     # Read video
     video_frames = read_video('nbashort.mp4')
+    
+    # Datos
+    court_image_path = "boceto_pista.webp"
+    court_size = (800,428) #Segun imagen de la pista
+    trajectory_video_path = "trayectorias.mp4" #Ruta video salida trayectorias
+    video_points = select_points('nbashort.mp4')
+    court_points = select_points(court_image_path)  # Coordenadas en el boceto
+    H = calculate_homography(video_points, court_points)
 
     # Initialize Tracker
     tracker = Tracker('models/aisport.pt')
@@ -43,6 +53,9 @@ def main():
 
     # Save video
     save_video(output_video_frames, 'output.avi')
+
+    # Generate trajectories
+    draw_trajectories(tracks, video_frames, court_image_path, court_size, trajectory_video_path,H)
 
 if __name__ == "__main__":
     main()

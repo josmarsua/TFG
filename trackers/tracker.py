@@ -214,8 +214,6 @@ class Tracker:
 
         return output_video_frames
                 
-    #Seguimiento de la posicion de la pelota (evitar frames en las que no se detecta)
-
     def interpolate_ball_positions(self, ball_positions):
         # Extraer las posiciones del balón (x1, y1, x2, y2)
         ball_positions = [x.get(1, {}).get('bbox', []) for x in ball_positions]
@@ -242,3 +240,4 @@ class Tracker:
         # Reconstruir el formato original
         ball_positions = [{1: {"bbox": x}} for x in interpolated_positions.to_numpy().tolist()]
         return ball_positions
+
