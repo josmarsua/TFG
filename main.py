@@ -3,26 +3,29 @@ from trackers import Tracker
 from team_assigner import TeamAssigner
 import cv2
 from utils import draw_trajectories, calculate_homography, select_points
-
+import numpy as np
 
 def main():
-    # Read video
-    video_frames = read_video('nbashort.mp4')
+    #Rutas
+    input_video = "nbashort.mp4"
+    output_video = "output_videos/detecciones.mp4"
+    trajectory_video_path = "output_videos/trayectorias.mp4" #Ruta video salida trayectorias
+    court_image_path = "boceto_pista.webp"
+    
+    # Leer vídeo
+    video_frames = read_video(input_video)
     
     # Datos
-    court_image_path = "boceto_pista.webp"
     court_size = (800,428) #Segun imagen de la pista
-    trajectory_video_path = "trayectorias.mp4" #Ruta video salida trayectorias
-    video_points = select_points('nbashort.mp4')
-    court_points = select_points(court_image_path)  # Coordenadas en el boceto
+    video_points = [(567,359),(1917,447),(1916,1074),(5,894)]#select_points(input_video)
+    court_points = [(0,0),(400,0),(400,428),(0,428)] #select_points(court_image_path)  
     H = calculate_homography(video_points, court_points)
 
-    # Initialize Tracker
+    # Tracker
     tracker = Tracker('models/aisport.pt')
-    
-    # Run tracker
     tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path='stubs/track_stubs.pkl')
     
+    """
     # Test crop visualization (optional, for debugging purposes)
     for track_id, player in tracks['players'][0].items():
         bbox = player['bbox']
@@ -30,31 +33,28 @@ def main():
         cropped_image = frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
         cv2.imwrite(f'cropped_img_debug.jpg', cropped_image)
         break
+    """
 
-    # Interpolate Ball Positions
+    # Interpolación balón
     tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
     
-    # Assign Player Teams using multiple frames for better robustness
+    # Asignar colores por equipo
     team_assigner = TeamAssigner()
-    initial_frames = min(len(video_frames), 30)  # Use up to 30 frames for initial color assignment
+    initial_frames = min(len(video_frames), 30) 
     for i in range(initial_frames):
         team_assigner.assign_team_color(video_frames[i], tracks['players'][i])
 
-    # Assign teams to players in all frames
     for frame_num, player_track in enumerate(tracks['players']):
         for player_id, track in player_track.items():
             team = team_assigner.get_player_team(video_frames[frame_num], track['bbox'], player_id)
             tracks['players'][frame_num][player_id]['team'] = team
             tracks['players'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
 
-    # Draw output
-    # Draw object tracks
+    # Dibujar detecciones
     output_video_frames = tracker.draw_annotations(video_frames, tracks)
 
-    # Save video
-    save_video(output_video_frames, 'output.avi')
-
-    # Generate trajectories
+    # Guardar vídeo y trayectorias
+    save_video(output_video_frames, output_video)
     draw_trajectories(tracks, video_frames, court_image_path, court_size, trajectory_video_path,H)
 
 if __name__ == "__main__":
