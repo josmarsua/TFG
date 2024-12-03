@@ -76,51 +76,73 @@ class Tracker:
 
         return tracks
     
-    def draw_ellipse(self,frame,bbox,color,track_id=None):
+    def draw_ellipse(self, frame, bbox, color, track_id=None, label=None):
         y2 = int(bbox[3])
         x_center, _ = get_center_of_bbox(bbox)
         width = get_width_of_bbox(bbox)
 
+        # Dibujar la elipse
         cv2.ellipse(
             frame,
-            center=(x_center,y2),
-            axes=(int(width),int(0.35*width)),
+            center=(x_center, y2),
+            axes=(int(width), int(0.35 * width)),
             angle=0.0,
             startAngle=-45,
             endAngle=235,
-            color= color,
+            color=color,
             thickness=2,
-            lineType=cv2.LINE_4
+            lineType=cv2.LINE_4,
         )
 
-        rectangle_width = 40
-        rectangle_height = 20
-        x1_rect = x_center - rectangle_width//2
-        x2_rect = x_center + rectangle_width//2
-        y1_rect = (y2 - rectangle_height//2) + 15
-        y2_rect = (y2 + rectangle_height//2) + 15
+        # Determinar el texto que se mostrará
+        if label:
+            text = label
+        elif track_id is not None:
+            text = f"Player\nID: {track_id}"
+        else:
+            return frame
 
-        if track_id is not None:
-            cv2.rectangle(
-                frame,
-                (int(x1_rect),int(y1_rect)),
-                (int(x2_rect),int(y2_rect)),
-                color,
-                cv2.FILLED
-            )
-            x1_text = x1_rect + 12
-            if track_id > 99:
-                x1_text -= 10
-            
+        # Configurar el texto
+        font_scale = 0.5
+        font_thickness = 2
+        text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
+
+        # Determinar las dimensiones del rectángulo para el texto
+        text_lines = text.split("\n")
+        line_height = text_size[1] + 5
+        rect_width = max([cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)[0][0] for line in text_lines]) + 10
+        rect_height = line_height * len(text_lines) + 5
+
+        # Coordenadas del rectángulo
+        x1_rect = x_center - rect_width // 2
+        x2_rect = x_center + rect_width // 2
+        y1_rect = y2 - rect_height - 5
+        y2_rect = y2 - 5
+
+        # Dibujar el rectángulo de fondo
+        cv2.rectangle(
+            frame,
+            (int(x1_rect), int(y1_rect)),
+            (int(x2_rect), int(y2_rect)),
+            color,
+            cv2.FILLED,
+        )
+
+        # Dibujar cada línea de texto, centrada en el rectángulo
+        y_text = y1_rect + line_height
+        for line in text_lines:
+            text_size, _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
+            x_text = x_center - text_size[0] // 2
             cv2.putText(
                 frame,
-                f"{track_id}",
-                (int(x1_text),int(y1_rect+15)),
+                line,
+                (int(x_text), int(y_text)),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.6,
-                (0,0,0),
-                2
+                font_scale,
+                (0, 0, 0),
+                font_thickness,
             )
+            y_text += line_height
 
         return frame
 
@@ -181,7 +203,7 @@ class Tracker:
 
             # Draw Referee
             for _, referee in referee_dict.items():
-                frame = self.draw_ellipse(frame, referee["bbox"],(255, 0, 255))
+                frame = self.draw_ellipse(frame, referee["bbox"],(255, 0, 255), label="Referee")
 
             # Draw Ball
             for _, ball in ball_dict.items():
