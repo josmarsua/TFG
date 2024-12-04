@@ -24,16 +24,6 @@ def main():
     # Tracker
     tracker = Tracker('models/aisport.pt')
     tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path='stubs/track_stubs.pkl')
-    
-    """
-    # Test crop visualization (optional, for debugging purposes)
-    for track_id, player in tracks['players'][0].items():
-        bbox = player['bbox']
-        frame = video_frames[0]
-        cropped_image = frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
-        cv2.imwrite(f'cropped_img_debug.jpg', cropped_image)
-        break
-    """
 
     # Interpolación balón
     tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])

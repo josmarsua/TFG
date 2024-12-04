@@ -35,7 +35,8 @@ class Tracker:
         tracks = {
             "players":[], #{0:{"bbox:[x1,y1,x2,y2]"},...}
             "referees":[],
-            "ball":[]
+            "ball":[],
+            "net":[]
         }
 
         for frame_num, detection in enumerate(detections):
@@ -51,6 +52,7 @@ class Tracker:
             tracks["players"].append({})
             tracks["referees"].append({})
             tracks["ball"].append({})
+            tracks["net"].append({})
 
             for frame_detection in detection_with_tracks:
                 bounding_box = frame_detection[0].tolist()
@@ -62,6 +64,9 @@ class Tracker:
 
                 if class_id == class_names_inverse['referee']:
                     tracks["referees"][frame_num][track_id] = {"bbox":bounding_box}
+                
+                if class_id == class_names_inverse['net']:
+                    tracks["net"][frame_num][track_id] = {"bbox":bounding_box}
             
             for frame_detection in detection_sv:
                 bounding_box = frame_detection[0].tolist()
@@ -186,6 +191,43 @@ class Tracker:
         cv2.circle(frame, (center_x, center_y), radius, color, thickness=2)
 
         return frame
+    
+    def draw_rectangle(self, frame, bbox, color, track_id=None):
+        """
+        Dibuja un rectángulo alrededor de la red basado en su bbox.
+        """
+        # Extraer coordenadas del bounding box
+        x1, y1, x2, y2 = map(int, bbox)
+
+        # Dibujar el rectángulo
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness=2)
+
+        # Añadir etiqueta opcional
+        if track_id is not None:
+            label = f"Net"
+            font_scale = 0.5
+            font_thickness = 2
+            text_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
+            text_x = x1
+            text_y = y1 - 5  # Justo encima del rectángulo
+
+            # Fondo del texto
+            cv2.rectangle(frame,
+                        (text_x, text_y - text_size[1]),
+                        (text_x + text_size[0], text_y + 5),
+                        color,
+                        cv2.FILLED)
+
+            # Texto
+            cv2.putText(frame,
+                        label,
+                        (text_x, text_y),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        font_scale,
+                        (0, 0, 0),  # Texto en negro
+                        font_thickness)
+
+        return frame
 
     def draw_annotations(self,video_frames,tracks):
         output_video_frames = []
@@ -195,6 +237,8 @@ class Tracker:
             player_dict = tracks["players"][frame_num]
             ball_dict = tracks["ball"][frame_num]
             referee_dict = tracks["referees"][frame_num]
+            net_dict = tracks["net"][frame_num]
+
 
             # Draw Players
             for track_id, player in player_dict.items():
@@ -209,6 +253,11 @@ class Tracker:
             for _, ball in ball_dict.items():
                 frame = self.draw_triangle(frame,ball["bbox"],(0,255,0)) 
                 frame = self.draw_circle(frame,ball["bbox"],(0,255,0))
+
+            # Draw Net
+            for track_id, net in net_dict.items():
+                color = (0, 128, 255)
+                frame = self.draw_rectangle(frame,net["bbox"],color,track_id)
 
             output_video_frames.append(frame)
 

@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import random
 
 def calculate_homography(video_points, court_points):
     """
@@ -132,6 +131,3 @@ def draw_trajectories(tracks, video_frames, court_image_path, court_size, output
         video_writer.write(court)
 
     video_writer.release()
-
-
-
