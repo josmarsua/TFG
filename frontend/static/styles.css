@@ -1,0 +1,88 @@
+h1 {
+    color: #000000;
+    text-align: center;
+    margin-top: 50px;
+}
+
+p {
+    text-align: center;
+    color: #666;
+    font-size: 18px;
+}
+.prompt {
+    color: #000000;
+    margin-top: 20px;
+}
+.button {
+    display: block; 
+    margin-top: 20px;
+    border-radius: 10%;
+    margin: 0 auto;
+    width: 100px;
+    height: 30px;
+}
+.button:hover { /* hovering over the button makes it a different color */
+    background-color: #dcb011;
+}
+.logIn {
+    display: block;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 80px;
+    height: 30px;
+}
+.signUp {
+    display:block;
+    position: absolute;
+    top: 20px;
+    right: 120px;
+    width: 80px;
+    height: 30px;
+}
+
+.logo-container {
+    display: flex;          
+    align-items: flex-end; 
+}
+
+.logo-icon {
+    width: 100px;      
+    height: 100px;          
+    object-fit: cover;      
+    border-radius: 20%;     
+    margin-right: 15px;     
+    margin-left: 15px;
+    margin-top: 10px;
+}
+
+.logo-text {
+    font-size: 24px;        
+    color: black;           
+    margin-bottom: 0;       
+}
+
+.horizontal-box {
+    display: inline-block;
+    margin: 5px;
+}
+
+.top-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px;
+}
+
+.centered-image {
+    display: block; /* Convertir en bloque */
+    margin: 0 auto; /* Centrar horizontalmente */
+    width: 7%; /* Establecer el ancho máximo al tamaño máximo de su contenedor */
+    height: 7%; /* Mantener la proporción de aspecto */
+}
+.logo {
+    display: block; /* Convertir en bloque */
+    margin: 0 auto; /* Centrar horizontalmente */
+    width: 3%; /* Establecer el ancho máximo al tamaño máximo de su contenedor */
+    height: 3%; /* Mantener la proporción de aspecto */
+}
