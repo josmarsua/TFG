@@ -1,25 +1,23 @@
-from utils import read_video, save_video
+from utils import read_video, save_video, draw_trajectories, calculate_homography
 from trackers import Tracker
 from team_assigner import TeamAssigner
-import cv2
-from utils import draw_trajectories, calculate_homography, select_points
-import numpy as np
+import os
 
-def main():
-    #Rutas
-    input_video = "nbashort.mp4"
-    output_video = "output_videos/detecciones.mp4"
-    #trajectory_video_path = "output_videos/trayectorias.mp4" #Ruta video salida trayectorias
-    #court_image_path = "boceto_pista.webp"
-    
+def process_video(input_video, output_video, trajectory_video_path, court_image_path):
+    # Verifica si los archivos existen
+    if not os.path.exists(input_video):
+        raise FileNotFoundError(f"El archivo de entrada {input_video} no existe.")
+    if not os.path.exists(court_image_path):
+        raise FileNotFoundError(f"El archivo de imagen de la cancha {court_image_path} no existe.")
+
     # Leer vídeo
     video_frames = read_video(input_video)
     
-    # Datos
-    #court_size = (800,428) #Segun imagen de la pista
-    #video_points = [(567,359),(1917,447),(1916,1074),(5,894)]#select_points(input_video)
-    #court_points = [(0,0),(400,0),(400,428),(0,428)] #select_points(court_image_path)  
-    #H = calculate_homography(video_points, court_points)
+    # Datos de la cancha
+    court_size = (800, 428)  # Dimensiones de la cancha
+    video_points = [(567, 359), (1917, 447), (1916, 1074), (5, 894)]
+    court_points = [(0, 0), (400, 0), (400, 428), (0, 428)]
+    H = calculate_homography(video_points, court_points)
 
     # Tracker
     tracker = Tracker('models/aisport.pt')
@@ -43,9 +41,6 @@ def main():
     # Dibujar detecciones
     output_video_frames = tracker.draw_annotations(video_frames, tracks)
 
-    # Guardar vídeo y trayectorias
+    # Guardar vídeos y trayectorias
     save_video(output_video_frames, output_video)
-    #draw_trajectories(tracks, video_frames, court_image_path, court_size, trajectory_video_path,H)
-
-if __name__ == "__main__":
-    main()
+    draw_trajectories(tracks, video_frames, court_image_path, court_size, trajectory_video_path, H)
