@@ -9,21 +9,21 @@ def main():
     #Rutas
     input_video = "nbashort.mp4"
     output_video = "output_videos/detecciones.mp4"
-    trajectory_video_path = "output_videos/trayectorias.mp4" #Ruta video salida trayectorias
-    court_image_path = "boceto_pista.webp"
+    #trajectory_video_path = "output_videos/trayectorias.mp4" #Ruta video salida trayectorias
+    #court_image_path = "boceto_pista.webp"
     
     # Leer vídeo
     video_frames = read_video(input_video)
     
     # Datos
-    court_size = (800,428) #Segun imagen de la pista
-    video_points = [(567,359),(1917,447),(1916,1074),(5,894)]#select_points(input_video)
-    court_points = [(0,0),(400,0),(400,428),(0,428)] #select_points(court_image_path)  
-    H = calculate_homography(video_points, court_points)
+    #court_size = (800,428) #Segun imagen de la pista
+    #video_points = [(567,359),(1917,447),(1916,1074),(5,894)]#select_points(input_video)
+    #court_points = [(0,0),(400,0),(400,428),(0,428)] #select_points(court_image_path)  
+    #H = calculate_homography(video_points, court_points)
 
     # Tracker
     tracker = Tracker('models/aisport.pt')
-    tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path='stubs/track_stubs.pkl')
+    tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path='stubs/track_stubsshort.pkl')
 
     # Interpolación balón
     tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
@@ -45,7 +45,7 @@ def main():
 
     # Guardar vídeo y trayectorias
     save_video(output_video_frames, output_video)
-    draw_trajectories(tracks, video_frames, court_image_path, court_size, trajectory_video_path,H)
+    #draw_trajectories(tracks, video_frames, court_image_path, court_size, trajectory_video_path,H)
 
 if __name__ == "__main__":
     main()
