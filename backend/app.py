@@ -17,21 +17,27 @@ app.config['PROCESSED_FOLDER'] = os.path.abspath(os.path.join(os.path.dirname(__
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
 
-# Agregar el directorio raíz al sys.path
+# Ajustar el directorio raíz para apuntar correctamente a la carpeta principal del proyecto
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(root_dir)
 
-# Ruta al archivo main.py
-main_file_path = os.path.join(root_dir, 'main.py')
+# Ruta al directorio video_analysis
+video_analysis_dir = os.path.join(root_dir, 'video_analysis')
+sys.path.append(video_analysis_dir)
+
+# Ruta al archivo main.py dentro de video_analysis
+main_file_path = os.path.join(video_analysis_dir, 'main.py')
 
 # Cargar el archivo como un módulo
 spec = importlib.util.spec_from_file_location("main", main_file_path)
 main = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(main)
 
-# Ahora puedes usar las funciones de main.py, como process_video
+# Uso la función para procesar el video desde main
 process_video = main.process_video
 
+# =======================
+# SUBIR UN VIDEO
+# =======================
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -50,16 +56,15 @@ def upload_file():
     # Rutas de salida
     output_video_path = os.path.join(app.config['PROCESSED_FOLDER'], f"processed_{filename}")
     trajectory_video_path = os.path.join(app.config['PROCESSED_FOLDER'], f"trajectory_{filename}")
-    court_image_path = os.path.join(root_dir, 'boceto_pista.webp')  # Ruta de la imagen de la cancha
+    court_image_path = os.path.join(video_analysis_dir, 'boceto_pista.webp')  # Nueva ruta de la cancha
 
     try:
-        # Llamar a process_video con todos los argumentos necesarios
         process_video(input_path, output_video_path, trajectory_video_path, court_image_path)
     except Exception as e:
         app.logger.error(f"Error al procesar el video: {e}")
         return jsonify({'error': f'Error al procesar el video: {str(e)}'}), 500
 
-    # Ajustar nombres de archivos compatibles
+    # Ajustar nombres de archivos compatibles (para previsualizacion)
     compatible_output_video = output_video_path.replace(".mp4", "_compatible.mp4")
     compatible_trajectory_video = trajectory_video_path.replace(".mp4", "_compatible.mp4")
 
@@ -68,6 +73,9 @@ def upload_file():
         'trajectory_file': f"/processed/{os.path.basename(compatible_trajectory_video)}"
     })
 
+# =======================
+# DESCARGAR UN VIDEO
+# =======================
 @app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):
     path = os.path.join(app.config['PROCESSED_FOLDER'], filename)
@@ -75,12 +83,11 @@ def download_file(filename):
         return jsonify({'error': 'File not found'}), 404
     return send_file(path, as_attachment=True)
 
+# =======================
+# PREVISUALIZAR UN VIDEO
+# =======================
 @app.route('/processed/<filename>', methods=['GET'])
 def serve_processed_video(filename):
-    """
-    Ruta para servir videos directamente desde la carpeta 'processed'.
-    Maneja solicitudes de rango de bytes para reproducción de video.
-    """
     path = os.path.join(app.config['PROCESSED_FOLDER'], filename)
     if not os.path.exists(path):
         return jsonify({'error': 'File not found'}), 404
