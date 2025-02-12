@@ -1,0 +1,1 @@
+from .video_routes import video_bp
