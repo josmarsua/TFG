@@ -163,7 +163,7 @@ cython_debug/
 
 
 # Archivos pt
-models/aisport.pt
+video_analysis/models/aisport.pt
 
 # Videos
 input_vid.mp4
@@ -174,5 +174,3 @@ nba.mp4
 nbashort.mp4
 acb.mp4
 
-# Development
-prueba.py
