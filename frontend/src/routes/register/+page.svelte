@@ -1,5 +1,7 @@
 <script>
     import { Input, Button, Form, FormGroup, Label, Alert } from '@sveltestrap/sveltestrap';
+    import Fa from 'svelte-fa';
+    import { faEye, faEyeSlash, faUser, faKey, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
     let username = "";
     let email = "";
@@ -9,6 +11,11 @@
     let isUsernameInvalid = false;
     let isEmailInvalid = false;
     let isPasswordInvalid = false;
+    let showPassword = false; // Estado para alternar la visibilidad de la contraseña
+
+    function togglePasswordVisibility() {
+        showPassword = !showPassword;
+    }
 
     async function register() {
         errorMessage = ""; // Resetear mensaje de error
@@ -53,7 +60,7 @@
 
         <Form on:submit={register} class="space-y-4">
             <FormGroup>
-                <Label for="username" class="block text-sm font-medium text-gray-600">Usuario</Label>
+                <Label for="username" class="flex items-center space-x-2 text-sm font-medium text-gray-600"><Fa icon={faUser} size="1x" secondaryOpacity={1} primaryColor="blue" secondaryColor="linen"/><span>Usuario</span></Label>
                 <Input
                     type="text"
                     bind:value={username}
@@ -65,7 +72,7 @@
             </FormGroup>
 
             <FormGroup>
-                <Label for="email" class="block text-sm font-medium text-gray-600">Correo electrónico</Label>
+                <Label for="email" class="flex items-center space-x-2 text-sm font-medium text-gray-600"><Fa icon={faEnvelope} size="1x" secondaryOpacity={1} primaryColor="blue" secondaryColor="linen"/><span>Correo electrónico</span></Label>
                 <Input
                     type="email"
                     bind:value={email}
@@ -77,15 +84,25 @@
             </FormGroup>
 
             <FormGroup>
-                <Label for="password" class="block text-sm font-medium text-gray-600">Contraseña</Label>
-                <Input
-                    type="password"
-                    bind:value={password}
-                    required
-                    placeholder="********"
-                    class="mt-1 w-full border rounded-lg px-3 py-2 shadow-sm transition"
-                    invalid={isPasswordInvalid}
-                />
+                <Label for="password" class="flex items-center space-x-2 text-sm font-medium text-gray-600"><Fa icon={faKey} size="1x" secondaryOpacity={1} primaryColor="blue" secondaryColor="linen"/><span>Contraseña</span></Label>
+                <div class="relative">
+                    <Input
+                        type={showPassword ? "text" : "password"}
+                        bind:value={password}
+                        required
+                        placeholder="********"
+                        invalid={isPasswordInvalid}
+                        class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition pr-10"
+                    />
+                    <Button 
+                        type="button"
+                        color="light"
+                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600 hover:text-gray-900"
+                        on:click={togglePasswordVisibility}
+                    >
+                        <Fa icon={showPassword ? faEyeSlash : faEye} />
+                    </Button>
+                </div>
             </FormGroup>
 
             <Button type="submit" color="primary" class="w-full py-2 text-lg font-semibold rounded-lg shadow-md">
