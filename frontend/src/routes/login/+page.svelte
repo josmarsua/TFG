@@ -47,8 +47,6 @@
             errorMessage = "No se pudo conectar con el servidor.";
         }
     }
-
-    import { fade } from 'svelte/transition';
 </script>
 
 <main class="flex items-center justify-center px-4 sm:px-6">
@@ -56,15 +54,7 @@
         <h2 class="text-2xl font-semibold text-center text-gray-700">Iniciar sesión</h2>
 
         {#if errorMessage}
-            <div class="bg-red-200 text-red-700 p-3 rounded-md mb-2 flex justify-between items-center" transition:fade>
-                <span>{errorMessage}</span>
-                <button
-                    class="ml-4 px-2 py-1 text-red-900 font-bold bg-red-300 hover:bg-red-400 rounded-full"
-                    on:click={() => errorMessage = ""}
-                >
-                    ×
-                </button>
-            </div>
+            <div class="bg-red-200 text-red-700 p-3 rounded-md mb-2">{errorMessage}</div>
         {/if}
 
         <Form on:submit={login} class="space-y-4">

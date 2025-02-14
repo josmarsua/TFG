@@ -1,10 +1,6 @@
 import os
-import re
-import importlib.util
-import sys
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 
 # Importar blueprints
@@ -34,6 +30,11 @@ db.init_app(app)
 # Registrar Blueprints
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(video_bp, url_prefix="/video")
+
+# Servir imagenes estaticas
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory("uploads", filename)
 
 # Crear base de datos
 with app.app_context():
