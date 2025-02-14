@@ -66,7 +66,7 @@
                     bind:value={username}
                     required
                     placeholder="Nombre de usuario"
-                    class="mt-1 w-full border rounded-lg px-3 py-2 shadow-sm transition"
+                    class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition"
                     invalid={isUsernameInvalid}
                 />
             </FormGroup>
@@ -78,7 +78,7 @@
                     bind:value={email}
                     required
                     placeholder="Correo electrónico"
-                    class="mt-1 w-full border rounded-lg px-3 py-2 shadow-sm transition"
+                    class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition"
                     invalid={isEmailInvalid}
                 />
             </FormGroup>

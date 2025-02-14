@@ -1,13 +1,31 @@
 <script>
     import { authToken } from "../store.js"; // Importamos el token de autenticación
     import { onMount } from "svelte";
-
+    import Fa from 'svelte-fa';
+    import { faPowerOff } from '@fortawesome/free-solid-svg-icons';
     let isAuthenticated = false;
+    let profilePicture = "/uploads/default_profile.webp"; // Imagen por defecto
 
-    // Verificar si el usuario está autenticado
-    onMount(() => {
-        authToken.subscribe(token => {
-            isAuthenticated = !!token; // Si hay token, está autenticado
+    // Verificar si el usuario está autenticado y obtener su imagen de perfil
+    onMount(async () => {
+        authToken.subscribe(async token => {
+            isAuthenticated = !!token;
+            if (isAuthenticated) {
+                try {
+                    const response = await fetch("http://127.0.0.1:5000/auth/profile", {
+                        method: "GET",
+                        headers: { "Authorization": `Bearer ${token}` },
+                    });
+
+                    const data = await response.json();
+                    if (response.ok && data.profile_picture) {
+                        profilePicture = `http://127.0.0.1:5000/uploads/${data.profile_picture}`;
+                    }
+    
+                } catch (error) {
+                    console.error("Error al obtener la imagen de perfil:", error);
+                }
+            }
         });
     });
 
@@ -37,12 +55,17 @@
                     Analizar
                 </a>
 
+                <!-- Icono de usuario con imagen de perfil -->
+                <a href="/dashboard" class="flex items-center space-x-2 hover:opacity-80">
+                    <img src={profilePicture} alt="Perfil" class="w-10 h-10 rounded-full border border-white shadow-md">
+                </a>
+
                 <!-- Botón de Cerrar Sesión -->
                 <button 
                     on:click={logout}
-                    class="bg-red-500 hover:bg-red-700 font-semibold py-2 px-4 rounded"
+                    class="bg-red-500 hover:bg-red-700 font-semibold py-1 px-2 rounded"
                 >
-                    Cerrar sesión
+                    <Fa icon={faPowerOff} size="1x" secondaryOpacity={1}/>
                 </button>
             {:else}
                 <!-- Botón de Iniciar Sesión / Registrarse -->

@@ -106,3 +106,5 @@ def serve_processed_video(filename):
     response.headers.add('Accept-Ranges', 'bytes')
 
     return response
+
+
