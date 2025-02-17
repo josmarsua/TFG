@@ -163,7 +163,8 @@ cython_debug/
 
 
 # Archivos pt
-video_analysis/models/aisport.pt
+video_analysis/models/aisports.pt
+video_analysis/models/keypoint.pt
 
 # Videos
 input_vid.mp4

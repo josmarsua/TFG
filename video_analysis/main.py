@@ -3,6 +3,8 @@ from trackers import Tracker
 from team_assigner import TeamAssigner
 import os
 from moviepy import VideoFileClip
+from court_keypoint_detector import CourtKeypointDetector
+from ball_possession import BallPossession
 
 def reprocesar_video_moviepy(input_path, output_path):
     """
@@ -26,6 +28,9 @@ def reprocesar_video_moviepy(input_path, output_path):
         raise RuntimeError(f"Error al reprocesar el video con MoviePy: {e}")
 
 def process_video(input_video, output_video, trajectory_video_path, court_image_path):
+    # Ruta base para el directorio `video_analysis`
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
     # Verifica si los archivos existen
     if not os.path.exists(input_video):
         raise FileNotFoundError(f"El archivo de entrada {input_video} no existe.")
@@ -50,20 +55,23 @@ def process_video(input_video, output_video, trajectory_video_path, court_image_
     court_points = [(0, 0), (400, 0), (400, 428), (0, 428)]
     H = calculate_homography(video_points, court_points)
 
-    # Ruta base para el directorio `video_analysis`
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Tracker
-    tracker_model_path = os.path.join(base_dir, 'models', 'aisport.pt')
+    # Inicializar Tracker y realizar tracking
+    tracker_model_path = os.path.join(base_dir, 'models', 'aisports.pt')
     stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshort.pkl')
 
     tracker = Tracker(tracker_model_path)
     tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path=stub_path)
 
-    # Interpolación balón
+    # Detector de puntos clave en la pista
+    keypoint_model_path = os.path.join(base_dir, 'models', 'keypoint.pt')
+    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskp.pkl')
+    court_keypoint_detector = CourtKeypointDetector(keypoint_model_path)
+    court_keypoint_detector_perframe = court_keypoint_detector.get_court_keypoints(video_frames, read_from_stub=True,stub_path=stub_path_kp)
+
+    # Interpolación del balón
     tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
-    
-    # Asignar colores por equipo
+   
+    # Asignar equipos
     team_assigner = TeamAssigner()
     initial_frames = min(len(video_frames), 30) 
     for i in range(initial_frames):
@@ -75,8 +83,22 @@ def process_video(input_video, output_video, trajectory_video_path, court_image_
             tracks['players'][frame_num][player_id]['team'] = team
             tracks['players'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
 
+    # Detector de posesión
+    ball_possession_detector = BallPossession()
+    ball_possession = ball_possession_detector.detect_ball_possession(tracks['players'],tracks["ball"])
+
+    # Construir player_assignment a partir de tracks:
+    player_assignment = []
+    for frame_players in tracks['players']:
+        # Para cada frame, creamos un diccionario {player_id: team}
+        assignment = {player_id: info.get('team', -1) 
+                    for player_id, info in frame_players.items()}
+        player_assignment.append(assignment)
+
     # Dibujar detecciones
     output_video_frames = tracker.draw_annotations(video_frames, tracks)
+    output_video_frames = court_keypoint_detector.draw_court_keypoints(output_video_frames, court_keypoint_detector_perframe)
+    output_video_frames = ball_possession_detector.draw_possession(output_video_frames,player_assignment,ball_possession)
 
     # Guardar videos y trayectorias
     save_video(output_video_frames, output_video, fps=video_metadata.fps)
