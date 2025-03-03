@@ -1,6 +1,6 @@
 import cv2
 from typing import NamedTuple
-
+from moviepy import VideoFileClip
 
 class VideoMetadata(NamedTuple):
     fps: float
@@ -21,44 +21,6 @@ def get_metadata(video_path):
         return VideoMetadata(fps, num_frames, width, height)
     finally:
         vc.release()
-
-def get_frame(video_file, frame_num, height=0):
-    """
-    Obtiene un cuadro específico de un video, con la opción de cambiar su tamaño.
-    """
-    vc = cv2.VideoCapture(video_file)
-    try:
-        vc.set(cv2.CAP_PROP_POS_FRAMES, frame_num)
-        ret, frame = vc.read()
-        if not ret:
-            raise ValueError(f"No se pudo obtener el cuadro {frame_num}")
-        if height > 0:
-            h, w, _ = frame.shape
-            width = int(w * height / h)
-            frame = cv2.resize(frame, (width, height))
-    finally:
-        vc.release()
-    return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-def cut_segment(video_file, out_file, start_frame, end_frame):
-    """
-    Extrae un segmento de un video entre dos cuadros dados y lo guarda en un nuevo archivo.
-    """
-    print(f'Extrayendo segmento: {out_file}')
-    vc = cv2.VideoCapture(video_file)
-    metadata = get_metadata(video_file)
-    vo = cv2.VideoWriter(out_file, cv2.VideoWriter_fourcc(*'mp4v'),
-                         metadata.fps, (metadata.width, metadata.height))
-
-    vc.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-    for _ in range(start_frame, end_frame):
-        ret, frame = vc.read()
-        if not ret:
-            break
-        vo.write(frame)
-
-    vc.release()
-    vo.release()
 
 def read_video(video_path):
     """
@@ -95,30 +57,16 @@ def save_video(output_video_frames, output_video_path, fps=24):
     out.release()
     print(f"Video guardado en: {output_video_path}")
 
-def select_points(video_path):
+def reprocesar_video_moviepy(input_path, output_path):
     """
-    Permite seleccionar puntos en el primer cuadro de un video haciendo clic con el ratón.
+    Reprocesa un video usando MoviePy para garantizar compatibilidad con navegadores.
     """
-    points = []
-
-    def click_event(event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            print(f"Punto seleccionado: ({x}, {y})")
-            points.append((x, y))
-
-    cap = cv2.VideoCapture(video_path)
-    ret, frame = cap.read()
-    if not ret:
-        print("Error al cargar el video.")
-        return []
-
-    cv2.imshow("Selecciona Puntos", frame)
-    cv2.setMouseCallback("Selecciona Puntos", click_event)
-
-    print("Haz clic en los puntos de referencia en el video.")
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    cap.release()
-
-    return points
-
+    try:
+        clip = VideoFileClip(input_path)
+        clip.write_videofile(
+            output_path, codec="libx264", audio_codec="aac",
+            temp_audiofile="temp-audio.m4a", remove_temp=True, preset="slow"
+        )
+        print(f"✅ Video reprocesado con éxito: {output_path}")
+    except Exception as e:
+        raise RuntimeError(f"❌ Error al reprocesar el video con MoviePy: {e}")

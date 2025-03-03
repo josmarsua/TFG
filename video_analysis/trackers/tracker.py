@@ -23,7 +23,7 @@ class Tracker:
             detections += detections_batch 
         return detections
     
-    def get_object_tracks(self, frames, read_from_stub=False, stub_path=None):
+    def get_object_tracks(self, frames, transformer_per_frame, read_from_stub=False, stub_path=None):
         
         if read_from_stub and stub_path is not None and os.path.exists(stub_path):
             with open(stub_path,'rb') as f:
@@ -31,7 +31,7 @@ class Tracker:
             return tracks
         
         detections = self.detect_frames(frames)
-
+                
         tracks = {
             "players":[], #{0:{"bbox:[x1,y1,x2,y2]"},...}
             "referees":[],
@@ -40,6 +40,8 @@ class Tracker:
         }
 
         for frame_num, detection in enumerate(detections):
+            transformer = transformer_per_frame[frame_num] # Transformacion del frame actual
+           
             class_names = detection.names #{0: player, 1: referee...}
             class_names_inverse = {value:key for key,value in class_names.items()}
 
@@ -58,9 +60,20 @@ class Tracker:
                 bounding_box = frame_detection[0].tolist()
                 class_id = frame_detection[3]
                 track_id = frame_detection[4]
+                
+                x_center, y_center = get_center_of_bbox(bounding_box)
+
+                 # Verificar si el transformer es None antes de aplicar la homografía
+                if transformer is None:
+                    court_x, court_y = x_center, y_center  # Usar las coordenadas originales sin transformación
+                else:
+                    court_x, court_y = transformer.transform_points(np.array([[x_center, y_center]]))[0]
 
                 if class_id == class_names_inverse['player']:
-                    tracks["players"][frame_num][track_id] = {"bbox":bounding_box}
+                    tracks["players"][frame_num][track_id] = {
+                        "bbox": bounding_box,
+                        "court_position": (court_x, court_y)
+                    }
 
                 if class_id == class_names_inverse['referee']:
                     tracks["referees"][frame_num][track_id] = {"bbox":bounding_box}
@@ -73,7 +86,7 @@ class Tracker:
                 class_id = frame_detection[3]
                 
                 if class_id == class_names_inverse['basketball']:
-                    tracks["ball"][frame_num][1] = {"bbox":bounding_box} #Solo hay un balon
+                    tracks["ball"][frame_num][1] = {"bbox":bounding_box} #Solo hay un balon, almacenamos en el track 1
 
         if stub_path is not None:
             with open(stub_path,'wb') as f:

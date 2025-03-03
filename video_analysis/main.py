@@ -1,89 +1,100 @@
-from utils import read_video, save_video, draw_trajectories, calculate_homography, get_metadata
+from utils import read_video, save_video, save_court_video, get_metadata, reprocesar_video_moviepy, calculate_transformers_per_frame, assign_teams
 from trackers import Tracker
-from team_assigner import TeamAssigner
 import os
-from moviepy import VideoFileClip
+import numpy as np
 from court_keypoint_detector import CourtKeypointDetector
 from ball_possession import BallPossession
 
-def reprocesar_video_moviepy(input_path, output_path):
+def process_video(input_video, output_video, court_video_path, court_image_path):
     """
-    Reprocesa un video usando MoviePy para garantizar compatibilidad con navegadores.
+    Procesar un video de un partido de baloncesto para realizar la lógica de detecciones,
+    análisis y mapeo de posiciones.
     """
-    try:
-        # Cargar el video
-        clip = VideoFileClip(input_path)
-        
-        # Guardar en formato H.264
-        clip.write_videofile(
-            output_path,
-            codec="libx264",  # Códec H.264
-            audio_codec="aac",  # Códec de audio AAC
-            temp_audiofile="temp-audio.m4a",  # Archivo temporal para el audio
-            remove_temp=True,  # Elimina el archivo temporal después
-            preset="slow"
-        )
-        print(f"Video reprocesado con éxito: {output_path}")
-    except Exception as e:
-        raise RuntimeError(f"Error al reprocesar el video con MoviePy: {e}")
-
-def process_video(input_video, output_video, trajectory_video_path, court_image_path):
-    # Ruta base para el directorio `video_analysis`
+    # =======================
+    # 1️⃣ CONFIGURACIÓN INICIAL
+    # =======================
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Verifica si los archivos existen
-    if not os.path.exists(input_video):
-        raise FileNotFoundError(f"El archivo de entrada {input_video} no existe.")
-    if not os.path.exists(court_image_path):
-        raise FileNotFoundError(f"El archivo de imagen de la cancha {court_image_path} no existe.")
+    if not os.path.exists(input_video) or not os.path.exists(court_image_path):
+        raise FileNotFoundError("❌ Archivo de entrada o imagen de cancha no encontrado.")
 
-    # Obtener metadatos del video
     video_metadata = get_metadata(input_video)
-    print(f"Procesando video: {input_video}")
-    print(f"Metadatos: {video_metadata}")
+    print(f"📹 Procesando video: {input_video} - {video_metadata.num_frames} frames")
 
-    # Leer video
+    # =======================
+    # 2️⃣ LECTURA DE VIDEO
+    # =======================
     video_frames = read_video(input_video)
 
-    # Validar que los cuadros coincidan con los metadatos
     if len(video_frames) != video_metadata.num_frames:
-        print(f"Advertencia: Se esperaban {video_metadata.num_frames} cuadros, pero se obtuvieron {len(video_frames)}.")
+        print(f"⚠️ Advertencia: {len(video_frames)} frames obtenidos, se esperaban {video_metadata.num_frames}.")
 
-    # Datos de la cancha (para mapeo de trayectorias)
-    court_size = (800, 428)  # Dimensiones de la cancha
-    video_points = [(567, 359), (1917, 447), (1916, 1074), (5, 894)]
-    court_points = [(0, 0), (400, 0), (400, 428), (0, 428)]
-    H = calculate_homography(video_points, court_points)
+    # =======================
+    # 3️⃣ DETECCIÓN DE PUNTOS CLAVE DE LA CANCHA
+    # =======================
+    print("🏀 Detectando puntos clave de la cancha...")
+    keypoint_model_path = os.path.join(base_dir, 'models', 'keypoint.pt')
+    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskpnuevo2.pkl')
 
-    # Inicializar Tracker y realizar tracking
+    court_keypoint_detector = CourtKeypointDetector(keypoint_model_path)
+    court_keypoint_detector_perframe = court_keypoint_detector.get_court_keypoints(video_frames, 
+                                                                                   read_from_stub=True,
+                                                                                   stub_path=stub_path_kp)
+   
+    court_size = (2000, 1163)  # Dimensiones del boceto de la cancha [px]
+
+    # Puntos referencia en el boceto de la cancha
+    court_reference_points = np.array([[145,127],[145,181],[145,436],[145,727],[145,981],[145,1036],[491,436],[491,727],
+                                       [1000,127],[1000,1036],
+                                       [1855,127],[1855,181],[1855,436],[1855,727],[1855,981],[1855,1036],[1855,436],[1855,727]], dtype=np.float32)  # Coordenadas ideales de la cancha en la imagen de referencia
+    
+    #court_reference_points = np.array([[144,126],[144,182],[144,435],[144,728],[144,983],[144,1039],
+    #                                   [404,182],[404,983],
+    #                                   [491,435],[491,728],[599,582],
+    #                                   [654,126],[672,582],[654,1039],
+    #                                   [1000,126],[1000,1039],
+    #                                   [1346,126],[1346,582],[1346,1039],
+    #                                   [1508,435],[1383,582],[1508,728],
+    #                                   [1596,182],[1596,983],
+    #                                   [1855,126],[1855,182],[1855,435],[1855,728],[1855,983],[1855,1039]], dtype=np.float32)  # Coordenadas ideales de la cancha en la imagen de referencia 
+
+    # Realizar transformaciones
+    print("🏀 Realizando calculos para homografia...")
+    transformers_per_frame = calculate_transformers_per_frame(court_keypoint_detector_perframe, court_keypoint_detector, court_reference_points)
+
+    # =======================
+    # 4️⃣ DETECCIÓN Y SEGUIMIENTO DE OBJETOS
+    # =======================    
     tracker_model_path = os.path.join(base_dir, 'models', 'aisports.pt')
-    stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshort.pkl')
+    stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo2.pkl')
+    print("🏀 Detectando y trackeando objetos...")
 
     tracker = Tracker(tracker_model_path)
-    tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path=stub_path)
+    tracks = tracker.get_object_tracks(video_frames, 
+                                       transformers_per_frame, 
+                                       read_from_stub=True, 
+                                       stub_path=stub_path)
 
-    # Detector de puntos clave en la pista
-    keypoint_model_path = os.path.join(base_dir, 'models', 'keypoint.pt')
-    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskp.pkl')
-    court_keypoint_detector = CourtKeypointDetector(keypoint_model_path)
-    court_keypoint_detector_perframe = court_keypoint_detector.get_court_keypoints(video_frames, read_from_stub=True,stub_path=stub_path_kp)
+    # =======================
+    # 5️⃣ INTERPOLACIÓN DEL BALÓN
+    # =======================
+    print("🏀 Interpolando posiciones del balon...")
 
-    # Interpolación del balón
     tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
-   
-    # Asignar equipos
-    team_assigner = TeamAssigner()
-    initial_frames = min(len(video_frames), 30) 
-    for i in range(initial_frames):
-        team_assigner.assign_team_color(video_frames[i], tracks['players'][i])
 
-    for frame_num, player_track in enumerate(tracks['players']):
-        for player_id, track in player_track.items():
-            team = team_assigner.get_player_team(video_frames[frame_num], track['bbox'], player_id)
-            tracks['players'][frame_num][player_id]['team'] = team
-            tracks['players'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
+    # =======================
+    # 6️⃣ ASIGNACIÓN DE EQUIPOS
+    # =======================
+    print("🏀 Asignando equipos...")
 
-    # Detector de posesión
+    tracks = assign_teams(video_frames, 
+                          tracks)
+
+    # =======================
+    # 7️⃣ CALCULAR POSESIÓN
+    # =======================
+    print("🏀 Calculando posesion de balon...")
+
     ball_possession_detector = BallPossession()
     ball_possession = ball_possession_detector.detect_ball_possession(tracks['players'],tracks["ball"])
 
@@ -95,18 +106,28 @@ def process_video(input_video, output_video, trajectory_video_path, court_image_
                     for player_id, info in frame_players.items()}
         player_assignment.append(assignment)
 
-    # Dibujar detecciones
+    # =======================
+    # 8️⃣ DIBUJAR ANOTACIONES
+    # =======================
+    print("🏀 Dibujando anotaciones...")
+
     output_video_frames = tracker.draw_annotations(video_frames, tracks)
     output_video_frames = court_keypoint_detector.draw_court_keypoints(output_video_frames, court_keypoint_detector_perframe)
     output_video_frames = ball_possession_detector.draw_possession(output_video_frames,player_assignment,ball_possession)
 
-    # Guardar videos y trayectorias
+    # =======================
+    # 9️⃣ GUARDAR VIDEOS
+    # =======================
+    print("🏀 Guardando videos...")
     save_video(output_video_frames, output_video, fps=video_metadata.fps)
-    draw_trajectories(tracks, video_frames, court_image_path, court_size, trajectory_video_path, H)
+    save_court_video(tracks, video_frames, court_image_path, court_size, court_video_path)
 
-    # Reprocesar videos con MoviePy
+    # =======================
+    # 🏁 REPROCESAR VIDEOS PARA COMPATIBILIDAD
+    # =======================
+
     compatible_output_video = output_video.replace(".mp4", "_compatible.mp4")
     reprocesar_video_moviepy(output_video, compatible_output_video)
 
-    compatible_trajectory_video = trajectory_video_path.replace(".mp4", "_compatible.mp4")
-    reprocesar_video_moviepy(trajectory_video_path, compatible_trajectory_video)
+    compatible_court_video = court_video_path.replace(".mp4", "_compatible.mp4")
+    reprocesar_video_moviepy(court_video_path, compatible_court_video)

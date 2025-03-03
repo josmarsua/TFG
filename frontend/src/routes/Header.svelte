@@ -1,14 +1,23 @@
 <script>
-    import { authToken } from "../store.js"; // Importamos el token de autenticación
-    import { onMount } from "svelte";
+    import { authToken } from "../store.js";
+    import { onMount, onDestroy } from "svelte";
     import Fa from 'svelte-fa';
     import { faPowerOff } from '@fortawesome/free-solid-svg-icons';
+
     let isAuthenticated = false;
-    let profilePicture = "/uploads/default_profile.webp"; // Imagen por defecto
+    let profilePicture = "http://127.0.0.1:5000/uploads/default_profile.webp"; // Imagen por defecto
+    let unsubscribe; // Para manejar la suscripción y evitar múltiples llamadas
 
     // Verificar si el usuario está autenticado y obtener su imagen de perfil
-    onMount(async () => {
-        authToken.subscribe(async token => {
+    onMount(() => {
+        // Obtener token de localStorage por si acaso
+        let storedToken = localStorage.getItem("token");
+        if (storedToken) {
+            authToken.set(storedToken);
+        }
+
+        // Suscripción a cambios en el token de autenticación
+        unsubscribe = authToken.subscribe(async (token) => {
             isAuthenticated = !!token;
             if (isAuthenticated) {
                 try {
@@ -17,16 +26,28 @@
                         headers: { "Authorization": `Bearer ${token}` },
                     });
 
+                    if (!response.ok) throw new Error("Error en la respuesta del servidor");
+
                     const data = await response.json();
-                    if (response.ok && data.profile_picture) {
+                    if (data.profile_picture) {
                         profilePicture = `http://127.0.0.1:5000/uploads/${data.profile_picture}`;
+                    } else {
+                        profilePicture = "/uploads/default_profile.webp";
                     }
-    
+
                 } catch (error) {
                     console.error("Error al obtener la imagen de perfil:", error);
+                    profilePicture = "/uploads/default_profile.webp"; // Imagen por defecto en caso de error
                 }
+            } else {
+                profilePicture = "/uploads/default_profile.webp"; // Si no está autenticado, usar la imagen por defecto
             }
         });
+    });
+
+    // Desuscribirse cuando el componente se destruye para evitar múltiples suscripciones
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
     });
 
     function logout() {
