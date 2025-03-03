@@ -9,8 +9,15 @@ class TeamAssigner:
         self.kmeans = None
 
     def get_clustering_model(self, image, n_clusters=3):
-        # Convert image to 2D
+        """
+        Aplica KMeans a una imagen para identificar los colores dominantes.
+        """
         image_2d = image.reshape(-1, 3)
+        image_2d = np.unique(image_2d, axis=0)  # Remove duplicate colors
+
+        n_clusters = min(n_clusters, len(image_2d))  # Ensure n_clusters is less than the number of unique colors
+        if n_clusters < 2:
+            return None
 
         # K-means with customizable clusters
         kmeans = KMeans(n_clusters=n_clusters, init="k-means++", n_init=10, random_state=42)
@@ -19,6 +26,9 @@ class TeamAssigner:
         return kmeans
 
     def get_player_color(self, frame, bbox):
+        """
+        Obtiene el color dominante de un jugador en un frame.
+        """
         image = frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]  # Image of a player
         height, width, _ = image.shape
 
@@ -48,12 +58,20 @@ class TeamAssigner:
         return dominant_color
 
     def assign_team_color(self, frame, player_detections):
+        """
+        Asigna un color a cada equipo en base a los colores de los jugadores.
+        """
         player_colors = []
         for _, player_detection in player_detections.items():
             bbox = player_detection['bbox']
             player_color = self.get_player_color(frame, bbox)
-            player_colors.append(player_color)
 
+            if player_color is not None:
+                player_colors.append(player_color)
+
+        if len(player_colors) < 2:
+            return
+        
         player_colors = np.array(player_colors)
 
         # Assign a color for each team using KMeans
@@ -66,14 +84,19 @@ class TeamAssigner:
         self.team_colors[2] = kmeans.cluster_centers_[1]
 
     def get_player_team(self, frame, player_bbox, player_id):
+        """
+        Clasifica a un jugador en un equipo en base a su color dominante.
+        """
         if player_id in self.player_team_dict:
             return self.player_team_dict[player_id]
 
         player_color = self.get_player_color(frame, player_bbox)
 
+        if player_color is None or self.kmeans is None:
+            return 0
+
         # Predict team using KMeans, with tolerance for color matching
         team_id = self.kmeans.predict(player_color.reshape(1, -1))[0] + 1
-
         self.player_team_dict[player_id] = team_id
 
         return team_id
