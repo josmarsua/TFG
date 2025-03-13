@@ -44,22 +44,16 @@ def upload_file():
 
     # Rutas de salida
     output_video_path = os.path.join(PROCESSED_FOLDER, f"processed_{filename}")
-    court_video_path = os.path.join(PROCESSED_FOLDER, f"court_{filename}")
     court_image_path = os.path.join(video_analysis_dir, 'court.png')  # Nueva ruta de la cancha
 
     try:
-        process_video(input_path, output_video_path, court_video_path, court_image_path)
+        process_video(input_path, output_video_path, court_image_path)
     except Exception as e:
         video_bp.logger.error(f"Error al procesar el video: {e}")
         return jsonify({'error': f'Error al procesar el video: {str(e)}'}), 500
 
-    # Ajustar nombres de archivos compatibles (para previsualizacion)
-    compatible_output_video = output_video_path.replace(".mp4", "_compatible.mp4")
-    compatible_court_video = court_video_path.replace(".mp4", "_compatible.mp4")
-
     return jsonify({
-        'processed_file': f"/video/download/{os.path.basename(compatible_output_video)}",
-        'court_file': f"/video/download/{os.path.basename(compatible_court_video)}"
+        'processed_file': f"/video/download/{os.path.basename(output_video_path)}"
     })
 
 @video_bp.route('/download/<filename>', methods=['GET'])

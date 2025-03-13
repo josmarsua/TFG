@@ -1,11 +1,11 @@
-from utils import read_video, save_video, save_court_video, get_metadata, reprocesar_video_moviepy, calculate_transformers_per_frame, assign_teams
+from utils import read_video, save_video, get_metadata, calculate_transformers_per_frame, assign_teams, generate_court_overlay, combine_frames
 from trackers import Tracker
 import os
 import numpy as np
 from court_keypoint_detector import CourtKeypointDetector
 from ball_possession import BallPossession
 
-def process_video(input_video, output_video, court_video_path, court_image_path):
+def process_video(input_video, output_video, court_image_path):
     """
     Procesar un video de un partido de baloncesto para realizar la lógica de detecciones,
     análisis y mapeo de posiciones.
@@ -113,21 +113,17 @@ def process_video(input_video, output_video, court_video_path, court_image_path)
 
     output_video_frames = tracker.draw_annotations(video_frames, tracks)
     output_video_frames = court_keypoint_detector.draw_court_keypoints(output_video_frames, court_keypoint_detector_perframe)
-    output_video_frames = ball_possession_detector.draw_possession(output_video_frames,player_assignment,ball_possession)
+    
 
     # =======================
     # 9️⃣ GUARDAR VIDEOS
     # =======================
-    print("🏀 Guardando videos...")
-    save_video(output_video_frames, output_video, fps=video_metadata.fps)
-    save_court_video(tracks, video_frames, court_image_path, court_size, court_video_path)
+    print("🏀 Guardando video...")
+    # Generar los frames del mapeo de la cancha y dibujar posesion
+    court_frames = generate_court_overlay(tracks, video_frames, court_image_path, court_size)
+    combined_frames = combine_frames(output_video_frames, court_frames)       
+    combined_frames = ball_possession_detector.draw_possession(combined_frames,player_assignment,ball_possession)
+    # Guardar el video 
+    save_video(combined_frames, output_video, fps=video_metadata.fps)
 
-    # =======================
-    # 🏁 REPROCESAR VIDEOS PARA COMPATIBILIDAD
-    # =======================
 
-    compatible_output_video = output_video.replace(".mp4", "_compatible.mp4")
-    reprocesar_video_moviepy(output_video, compatible_output_video)
-
-    compatible_court_video = court_video_path.replace(".mp4", "_compatible.mp4")
-    reprocesar_video_moviepy(court_video_path, compatible_court_video)

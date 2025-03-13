@@ -1,6 +1,7 @@
 import cv2
 from typing import NamedTuple
-from moviepy import VideoFileClip
+from moviepy import ImageSequenceClip
+import numpy as np
 
 class VideoMetadata(NamedTuple):
     fps: float
@@ -38,35 +39,65 @@ def read_video(video_path):
 
 def save_video(output_video_frames, output_video_path, fps=24):
     """
-    Guarda una lista de cuadros como un archivo de video MP4.
+    Guarda un video directamente en formato H.264 usando MoviePy para compatibilidad con navegadores.
+    Esto evita el doble procesamiento (guardar con OpenCV y luego reprocesar con MoviePy).
     """
     if not output_video_frames:
         raise ValueError("No hay cuadros para guardar.")
 
     height, width = output_video_frames[0].shape[:2]
-    print(f"Guardando video con resolución: {width}x{height} a {fps} FPS.")
+    print(f"Guardando video en formato H.264: {width}x{height} a {fps} FPS.")
 
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
-
-    for frame in output_video_frames:
-        if frame.shape[:2] != (height, width):
-            raise ValueError("Los cuadros tienen dimensiones inconsistentes.")
-        out.write(frame)
-
-    out.release()
-    print(f"Video guardado en: {output_video_path}")
-
-def reprocesar_video_moviepy(input_path, output_path):
-    """
-    Reprocesa un video usando MoviePy para garantizar compatibilidad con navegadores.
-    """
     try:
-        clip = VideoFileClip(input_path)
-        clip.write_videofile(
-            output_path, codec="libx264", audio_codec="aac",
-            temp_audiofile="temp-audio.m4a", remove_temp=True, preset="slow"
-        )
-        print(f"✅ Video reprocesado con éxito: {output_path}")
+        # Convertir frames de BGR (OpenCV) a RGB (MoviePy usa RGB)
+        video_frames_rgb = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) for frame in output_video_frames]
+
+        # Crear clip de video
+        clip = ImageSequenceClip(video_frames_rgb, fps=fps)
+
+        # Guardar en formato compatible
+        clip.write_videofile(output_video_path, codec="libx264", audio_codec="aac", preset="slow")
+
+        print(f"✅ Video guardado con éxito en formato compatible: {output_video_path}")
     except Exception as e:
-        raise RuntimeError(f"❌ Error al reprocesar el video con MoviePy: {e}")
+        raise RuntimeError(f"❌ Error al guardar el video con MoviePy: {e}")
+
+def combine_frames(output_video_frames, court_frames):
+    """
+    Combina los cuadros de un video
+    con los cuadros de un boceto de la cancha.
+    """
+    # Obtener dimensiones del video original y del boceto de la cancha
+    video_height, video_width = output_video_frames[0].shape[:2]
+    court_height, court_width = court_frames[0].shape[:2]
+
+    # Definir nuevo ancho del boceto 
+    court_new_width = video_width // 4  # Reduce el tamaño a 1/4 del ancho del video principal
+    scale_factor = court_new_width / court_width  # Factor de escalado
+    court_new_height = int(court_height * scale_factor)  # Mantener la proporción
+
+    combined_frames = []
+    for frame_num in range(len(output_video_frames)):
+        if frame_num >= len(court_frames):
+            break  
+
+        main_frame = output_video_frames[frame_num]
+        court_frame = court_frames[frame_num]
+        # Redimensionar el boceto manteniendo la proporción
+        court_frame_resized = cv2.resize(court_frame, (court_new_width, court_new_height))
+
+        # Crear imagen de fondo blanco con las dimensiones del video original
+        white_background = np.ones((video_height, court_new_width, 3), dtype=np.uint8) * 255
+
+        # Calcular la posición para centrar la cancha en altura
+        start_y = (video_height - court_new_height) // 2
+
+        # Insertar el boceto en el fondo blanco
+        white_background[start_y:start_y + court_new_height, :] = court_frame_resized
+
+        # Combinar el video principal con el boceto más pequeño
+        combined_frame = np.hstack((main_frame, white_background))
+
+        combined_frames.append(combined_frame)
+
+    return combined_frames
