@@ -151,27 +151,31 @@ class BallPossession:
 
     def draw_frame(self, frame, frame_num, team_ball_control):
         """
-        Dibuja un overlay semitransparente con las estadísticas de posesión sobre un frame.
-        Se ubica en la esquina superior derecha
+        Dibuja un overlay semitransparente con las estadísticas de posesión en la parte superior de la sección del boceto.
+        Ajustado para moverse más a la izquierda y reestructurar el texto.
         """
         overlay = frame.copy()
         frame_height, frame_width = overlay.shape[:2]
-        margin = 10  # margen en píxeles desde el borde
-        rect_width = int(frame_width * 0.35)
-        rect_height = int(frame_height * 0.15)
 
-        # Coordenadas para el rectángulo en la esquina superior derecha
-        rect_x2 = frame_width - margin
-        rect_x1 = rect_x2 - rect_width
-        rect_y1 = margin
+        # 🔹 Ajustar el ancho real del video y la zona del boceto
+        main_video_width = int(frame_width * 0.75)  # 75% del frame combinado es el video
+        court_section_width = frame_width - main_video_width  # 25% del frame es el boceto
+
+        rect_width = int(court_section_width * 0.95)  # Hacer que ocupe casi todo el ancho del boceto
+        rect_height = int(frame_height * 0.18)  # Aumentar ligeramente la altura
+
+        # 🔹 Posicionar el overlay más a la izquierda dentro del boceto
+        rect_x1 = main_video_width + int(court_section_width * 0.225)  # Pequeño margen izquierdo
+        rect_x2 = rect_x1 + rect_width
+        rect_y1 = int(frame_height * 0.02)  # Más arriba
         rect_y2 = rect_y1 + rect_height
 
-        # Dibujar el rectángulo de fondo semitransparente
+        # 🔹 Dibujar el rectángulo de fondo blanco semitransparente
         cv2.rectangle(overlay, (rect_x1, rect_y1), (rect_x2, rect_y2), (255, 255, 255), -1)
-        alpha = 0.8
+        alpha = 0.9  # Más opacidad para mejorar visibilidad
         cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
 
-        # Calcular estadísticas de control de balón hasta el frame actual
+        # 🔹 Calcular estadísticas de control de balón hasta el frame actual
         team_control_till_frame = team_ball_control[:frame_num+1]
         team1_frames = (team_control_till_frame == 1).sum()
         team2_frames = (team_control_till_frame == 2).sum()
@@ -179,18 +183,20 @@ class BallPossession:
         team1_percent = team1_frames / total if total > 0 else 0
         team2_percent = team2_frames / total if total > 0 else 0
 
-        # Posiciones para el texto dentro del rectángulo
-        text_x = rect_x1 + 10
-        text_y1 = rect_y1 + int(rect_height * 0.5)
-        text_y2 = rect_y1 + int(rect_height * 0.9)
+        # 🔹 Posiciones para el texto dentro del rectángulo
+        text_x = rect_x1 + int(rect_width * 0.1)  # Más a la izquierda
+        text_y1 = rect_y1 + int(rect_height * 0.3)  # Primera línea (Ball Possession)
+        text_y2 = rect_y1 + int(rect_height * 0.6)  # Segunda línea (Team 1)
+        text_y3 = rect_y1 + int(rect_height * 0.9)  # Tercera línea (Team 2)
 
-        # Tipografia
+        # 🔹 Aumentar tamaño del texto
         font = cv2.FONT_HERSHEY_DUPLEX
-        font_scale = 1
-        thickness = 1
+        font_scale = 1.4  # Más grande
+        thickness = 2  # Más grueso
 
-        cv2.putText(frame, f"Team 1 Ball Possession: {team1_percent*100:.2f}%", (text_x, text_y1),
-                    font, font_scale, (0, 0, 0), thickness)
-        cv2.putText(frame, f"Team 2 Ball Possession: {team2_percent*100:.2f}%", (text_x, text_y2),
-                    font, font_scale, (0, 0, 0), thickness)
+        # 🔹 Agregar el texto de posesión en tres líneas
+        cv2.putText(frame, "Ball Possession", (text_x, text_y1), font, font_scale, (0, 0, 0), thickness)
+        cv2.putText(frame, f"Team 1: {team1_percent*100:.2f}%", (text_x, text_y2), font, font_scale, (0, 0, 0), thickness)
+        cv2.putText(frame, f"Team 2: {team2_percent*100:.2f}%", (text_x, text_y3), font, font_scale, (0, 0, 0), thickness)
+
         return frame

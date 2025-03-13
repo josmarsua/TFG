@@ -4,10 +4,7 @@
     import { Container, Row, Col, Button, Input } from '@sveltestrap/sveltestrap';
 
     let file = null;
-    let processedFile = null;
-    let courtFile = null;
     let processedPreviewURL = null;
-    let courtPreviewURL = null;
     let isAuthenticated = false;
     let isLoading = false;
     let errorMessage = "";
@@ -53,10 +50,8 @@
             }
 
             const data = await response.json();
-            processedFile = `http://127.0.0.1:5000${data.processed_file}`;
-            courtFile = `http://127.0.0.1:5000${data.court_file}`;
+            let processedFile = `http://127.0.0.1:5000${data.processed_file}`;
             processedPreviewURL = processedFile.replace('/processed/','/download/');
-            courtPreviewURL = courtFile.replace('/processed/','/download/');
 
         } catch (error) {
             errorMessage = "Error al procesar el video. Asegúrate de estar autenticado.";
@@ -97,34 +92,13 @@
             </div>
             {/if}
 
-            {#if processedFile && courtFile}
+            {#if processedPreviewURL}
                 <div class="mt-8">
                     <h2 class="text-2xl font-semibold text-gray-800">Resultados</h2>
-                    <p>
-                        <a href="{processedFile}" download target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">
-                            Descargar Video Procesado
-                        </a>
-                    </p>
-                    <p>
-                        <a href="{courtFile}" download target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">
-                            Descargar Video de Trayectorias
-                        </a>
-                    </p>
-
-                    <h3 class="text-xl font-bold text-gray-800">Previsualización</h3>
                     <div class="mt-4">
-                        <h4 class="text-lg font-semibold text-gray-700">Video Procesado</h4>
                         <!-- svelte-ignore a11y_media_has_caption -->
                         <video controls class="w-full max-w-lg mx-auto rounded shadow-lg">
                             <source src={processedPreviewURL} type="video/mp4" />
-                            Tu navegador no soporta la reproducción de videos.
-                        </video>
-                    </div>
-                    <div class="mt-4">
-                        <h4 class="text-lg font-semibold text-gray-700">Video de Trayectorias</h4>
-                        <!-- svelte-ignore a11y_media_has_caption -->
-                        <video controls class="w-full max-w-lg mx-auto rounded shadow-lg">
-                            <source src={courtPreviewURL} type="video/mp4" />
                             Tu navegador no soporta la reproducción de videos.
                         </video>
                     </div>
