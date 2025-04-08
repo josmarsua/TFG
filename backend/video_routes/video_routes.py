@@ -31,7 +31,7 @@ STATUS_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '../stat
 # Crear directorios si no existen
 for folder in [UPLOAD_FOLDER, PROCESSED_FOLDER, STATUS_FOLDER]:
     os.makedirs(folder, exist_ok=True)
-    
+
 # =======================
 # SUBIR UN VIDEO
 # =======================
@@ -126,6 +126,10 @@ def get_status(video_id):
     if not os.path.exists(status_path):
         return jsonify({"step": "Esperando procesamiento"}), 404
 
-    with open(status_path) as f:
-        data = json.load(f)
-    return jsonify(data)
+    try:
+        with open(status_path) as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"step": "❌ Error al leer estado"}), 500
+

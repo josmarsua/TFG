@@ -15,6 +15,8 @@
     let videoId = "";
     let intervalId = null;
 
+    let progress = 0;
+
     onMount(() => {
         authToken.subscribe(token => {
             isAuthenticated = !!token;
@@ -42,7 +44,7 @@
         try {
             const token = localStorage.getItem("token");
 
-            const response = await fetch('http://127.0.0.1:5000/video/upload', {
+            const response = await fetch('http://localhost:5000/video/upload', {
                 method: 'POST',
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -56,10 +58,10 @@
 
             const data = await response.json();
             videoId = data.video_id;
-            tempProcessedFile = `http://127.0.0.1:5000${data.processed_file}`; 
+            tempProcessedFile = `http://localhost:5000${data.processed_file}`; 
             processingStatus = "🚀 Comenzando procesamiento...";
 
-            intervalId = setInterval(pollStatus, 1000);
+            intervalId = setInterval(pollStatus, 1000); // Poll every second
 
         } catch (error) {
             errorMessage = "Error al procesar el video. Asegúrate de estar autenticado.";
@@ -69,21 +71,29 @@
 
     async function pollStatus() {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/video/status/${videoId}`);
+            const response = await fetch(`http://localhost:5000/video/status/${videoId}`);
             if (response.ok) {
                 const data = await response.json();
                 processingStatus = data.step;
 
-                if (processingStatus.includes("✅") || processingStatus.includes("❌")) {
+                if (data.progress !== undefined) {
+                    progress = data.progress;
+                }
+
+                if (processingStatus.includes("✅")) {
                     clearInterval(intervalId);
-                    processedPreviewURL = tempProcessedFile; 
-                    isLoading = false; 
+                    processedPreviewURL = tempProcessedFile; // <- MOSTRAR VIDEO
+                }
+
+                if (processingStatus.includes("❌")) {
+                    clearInterval(intervalId);
                 }
             }
         } catch (err) {
             console.error("Error haciendo polling:", err);
         }
     }
+
 </script>
 
 <svelte:head>
@@ -122,8 +132,9 @@
             <!-- Barra de Progreso -->
             <div class="mt-4">
                 <div class="w-full bg-gray-200 rounded-full h-4">
-                    <div class="bg-blue-500 h-4 rounded-full animate-progress"></div>
+                    <div class="bg-blue-500 h-4 rounded-full" style="width: {progress}%; transition: width 0.5s;"></div>
                 </div>
+                <p class="text-center text-sm text-gray-600 mt-1">{progress}%</p>
             </div>
             {/if}
 
@@ -158,9 +169,6 @@
     @import "/styles.css";
     @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
-    .animate-progress {
-        animation: progress 2s infinite;
-    }
 
     @keyframes progress {
         0% {

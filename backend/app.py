@@ -9,7 +9,7 @@ from auth import auth_bp, db
 from video_routes import video_bp
 
 app = Flask(__name__)
-CORS(app)  # Habilitar comunicación frontend-backend
+CORS(app, supports_credentials=True)
 
 # =======================
 # CONFIGURACIÓN GENERAL
@@ -32,6 +32,12 @@ db.init_app(app)
 # Registrar Blueprints
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(video_bp, url_prefix="/video")
+
+# Configurar CORS
+@app.after_request
+def apply_cors_headers(response):
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 # Servir imagenes estaticas
 @app.route('/uploads/<filename>')

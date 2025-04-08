@@ -12,12 +12,12 @@ def process_video(input_video, output_video, court_image_path, status_path):
     Procesar un video de un partido de baloncesto para realizar la lógica de detecciones,
     análisis y mapeo de posiciones.
     """
-    def set_status(msg):
-        """
-        Actualiza el estado del procesamiento del video.
-        """
+    def set_status(msg, progress=None):
+        status = {"step": msg}
+        if progress is not None:
+            status["progress"] = progress
         with open(status_path, "w") as f:
-            json.dump({"step": msg}, f)
+            json.dump(status, f)
 
     # =======================
     # 1️⃣ CONFIGURACIÓN INICIAL
@@ -29,7 +29,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
 
     video_metadata = get_metadata(input_video)
     print(f"📹 Procesando video: {input_video} - {video_metadata.num_frames} frames")
-    set_status(f"📹 Procesando video: {input_video} - {video_metadata.num_frames} frames")
+    set_status(f"📹 Procesando video: {input_video} - {video_metadata.num_frames} frames", 5)
     # =======================
     # 2️⃣ LECTURA DE VIDEO
     # =======================
@@ -42,7 +42,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 3️⃣ DETECCIÓN DE PUNTOS CLAVE DE LA CANCHA
     # =======================
     print("🏀 Detectando puntos clave de la cancha...")
-    set_status("🏀 Detectando puntos clave de la cancha...")
+    set_status("🏀 Detectando puntos clave de la cancha...", 10)
     keypoint_model_path = os.path.join(base_dir, 'models', 'keypoint.pt')
     stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskpnuevo5.pkl')
 
@@ -58,7 +58,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     tracker_model_path = os.path.join(base_dir, 'models', 'aisports.pt')
     stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo5.pkl')
     print("🏃‍♂️ Detectando y trackeando objetos...")
-    set_status("🏃‍♂️ Detectando y trackeando objetos...")
+    set_status("🏃‍♂️ Detectando y trackeando objetos...", 20)
     tracker = Tracker(tracker_model_path)
     tracks = tracker.get_object_tracks(video_frames, 
                                        read_from_stub=True, 
@@ -68,20 +68,20 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 5️⃣ INTERPOLACIÓN DEL BALÓN
     # =======================
     print("🏀 Interpolando posiciones del balon...")
-    set_status("🏀 Interpolando posiciones del balon...")
+    set_status("🏀 Interpolando posiciones del balon...", 35)
     tracks["ball"] = tracker.interpolate_ball_tracks(tracks["ball"])
 
     # =======================
     # 6️⃣ ASIGNACIÓN DE EQUIPOS
     # =======================
     print("⛹️ Asignando equipos...")
-    set_status("⛹️ Asignando equipos...")
+    set_status("⛹️ Asignando equipos...", 40)
     tracks = assign_teams(video_frames, 
                           tracks)
 
     # Realizar transformaciones
     print("📍 Realizando calculos para homografia...")
-    set_status("📍 Realizando cálculos para homografia...")
+    set_status("📍 Realizando cálculos para homografia...", 55)
     transformer = Transformer(court_image_path)
     court_keypoint_detector_perframe = transformer.validate_kp(court_keypoint_detector_perframe)
     court_player_positions = transformer.transform_players(court_keypoint_detector_perframe, tracks["players"])
@@ -90,7 +90,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 7️⃣ CALCULAR POSESIÓN
     # =======================
     print("🎯 Calculando posesion de balon...")
-    set_status("🎯 Calculando posesion de balon...")
+    set_status("🎯 Calculando posesion de balon...", 65)
     ball_possession_detector = BallPossession()
     ball_possession = ball_possession_detector.detect_ball_possession(tracks['players'],tracks["ball"])
 
@@ -106,11 +106,12 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 8️⃣ DIBUJAR ANOTACIONES
     # =======================
     print("🎨 Dibujando anotaciones...")
-    set_status("🎨 Dibujando anotaciones...")
+    set_status("🎨 Dibujando anotaciones...", 70)
 
     output_video_frames = tracker.draw_annotations(video_frames, tracks)
+    set_status("🎨 Dibujando anotaciones...", 75)
     output_video_frames = court_keypoint_detector.draw_court_keypoints(output_video_frames, court_keypoint_detector_perframe)
-
+    set_status("🎨 Dibujando anotaciones...", 80)
     output_video_frames = transformer.draw_court_overlay(output_video_frames, 
                                           transformer.court_pic_path, 
                                           transformer.width, 
@@ -127,8 +128,8 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 9️⃣ GUARDAR VIDEOS
     # =======================
     print("💾 Guardando video...")
-    set_status("💾 Guardando video...")
+    set_status("💾 Guardando video...", 85)
     
     # Guardar el video 
     save_video(output_video_frames, output_video, fps=video_metadata.fps)
-    set_status("✅ Video procesado")
+    set_status("✅ Video procesado", 100)
