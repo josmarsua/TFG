@@ -66,7 +66,7 @@ class CourtKeypointDetector:
                             (int(x), int(y) - 10),  # Posición encima del punto
                             cv2.FONT_HERSHEY_SIMPLEX, 
                             0.5,  # Tamaño del texto
-                            (0, 0, 0),  # Color (blanco)
+                            (255, 255, 255),  # Color (blanco)
                             2, 
                             cv2.LINE_AA
                         )
@@ -74,34 +74,4 @@ class CourtKeypointDetector:
             output_frames.append(annotated_frame)
 
         return output_frames
-    
-    def match_keypoints(self, source_kp, court_reference_points):
-        """
-        Asocia los keypoints detectados con los puntos de referencia de la cancha.
-        """
-        if len(source_kp) == 0:
-            return np.full_like(court_reference_points, -1) # Rellenar con -1 si no hay kp detectados
-        
-        matched_kp = np.zeros_like(court_reference_points)
-        assigned = set()
-
-        for i, ref_point in enumerate(court_reference_points):
-            if len(source_kp) == 0:
-                matched_kp[i] = [-1, -1]
-                continue
-
-            distances = np.linalg.norm(source_kp - ref_point, axis=1)
-
-            if distances.size == 0:
-                matched_kp[i] = [-1, -1]
-                continue
-
-            closest_idx = np.argmin(distances)
-
-            if closest_idx not in assigned:
-                matched_kp[i] = source_kp[closest_idx]
-                assigned.add(closest_idx)
-            else:
-                matched_kp[i] = [-1, -1]  # Marcar como no asignado
-        
-        return matched_kp
+ 

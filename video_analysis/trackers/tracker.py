@@ -8,7 +8,6 @@ import cv2
 import sys
 sys.path.append('../')
 from utils import get_width_of_bbox, get_center_of_bbox
-from scipy.interpolate import CubicSpline
 
 class Tracker:
     def __init__(self, model_path):
@@ -23,7 +22,7 @@ class Tracker:
             detections += detections_batch 
         return detections
     
-    def get_object_tracks(self, frames, transformer_per_frame, read_from_stub=False, stub_path=None):
+    def get_object_tracks(self, frames, read_from_stub=False, stub_path=None):
         
         if read_from_stub and stub_path is not None and os.path.exists(stub_path):
             with open(stub_path,'rb') as f:
@@ -40,7 +39,6 @@ class Tracker:
         }
 
         for frame_num, detection in enumerate(detections):
-            transformer = transformer_per_frame[frame_num] # Transformacion del frame actual
            
             class_names = detection.names #{0: player, 1: referee...}
             class_names_inverse = {value:key for key,value in class_names.items()}
@@ -61,19 +59,8 @@ class Tracker:
                 class_id = frame_detection[3]
                 track_id = frame_detection[4]
                 
-                x_center, y_center = get_center_of_bbox(bounding_box)
-
-                 # Verificar si el transformer es None antes de aplicar la homografía
-                if transformer is None:
-                    court_x, court_y = x_center, y_center  # Usar las coordenadas originales sin transformación
-                else:
-                    court_x, court_y = transformer.transform_points(np.array([[x_center, y_center]]))[0]
-
                 if class_id == class_names_inverse['player']:
-                    tracks["players"][frame_num][track_id] = {
-                        "bbox": bounding_box,
-                        "court_position": (court_x, court_y)
-                    }
+                    tracks["players"][frame_num][track_id] = {"bbox": bounding_box}
 
                 if class_id == class_names_inverse['referee']:
                     tracks["referees"][frame_num][track_id] = {"bbox":bounding_box}
@@ -264,6 +251,8 @@ class Tracker:
 
             # Draw Ball
             for _, ball in ball_dict.items():
+                if ball["bbox"] is None:
+                    continue
                 frame = self.draw_triangle(frame,ball["bbox"],(0,255,0)) 
                 frame = self.draw_circle(frame,ball["bbox"],(0,255,0))
 
@@ -276,30 +265,19 @@ class Tracker:
 
         return output_video_frames
                 
-    def interpolate_ball_positions(self, ball_positions):
-        # Extraer las posiciones del balón (x1, y1, x2, y2)
-        ball_positions = [x.get(1, {}).get('bbox', []) for x in ball_positions]
-        df_ball_positions = pd.DataFrame(ball_positions, columns=['x1', 'y1', 'x2', 'y2'])
+    def interpolate_ball_tracks(self, ball_tracks):
+        """
+        Inteporla las posiciones del balón en los frames.
+        """
+        # Extraer las coordenadas del balón (x1, y1, x2, y2)
+        ball_tracks = [x.get(1, {}).get('bbox', []) for x in ball_tracks]
+        df_ball_tracks = pd.DataFrame(ball_tracks, columns=['x1', 'y1', 'x2', 'y2'])
 
-        # Índices donde las posiciones del balón están disponibles
-        valid_indices = df_ball_positions.dropna().index.to_numpy()
-        missing_indices = df_ball_positions[df_ball_positions.isna().any(axis=1)].index.to_numpy()
-
-        if len(valid_indices) < 2:  # No hay suficiente información para interpolar
-            return [{1: {"bbox": [0, 0, 0, 0]}} for _ in ball_positions]
-
-        # Interpolación cúbica para cada columna (x1, y1, x2, y2)
-        interpolated_positions = df_ball_positions.copy()
-        for col in df_ball_positions.columns:
-            valid_values = df_ball_positions[col].dropna().to_numpy()
-            if len(valid_values) >= 2:  # Necesita al menos dos puntos válidos
-                spline = CubicSpline(valid_indices, valid_values, bc_type='natural')
-                interpolated_positions.loc[missing_indices, col] = spline(missing_indices)
-
-        # Rellenar valores faltantes al principio o al final (si es necesario)
-        interpolated_positions = interpolated_positions.bfill().ffill()
+        # Interpolación
+        df_ball_tracks = df_ball_tracks.interpolate()
+        df_ball_tracks = df_ball_tracks.bfill()
 
         # Reconstruir el formato original
-        ball_positions = [{1: {"bbox": x}} for x in interpolated_positions.to_numpy().tolist()]
-        return ball_positions
+        ball_tracks = [{1: {"bbox": x}} for x in df_ball_tracks.to_numpy().tolist()]
+        return ball_tracks
 
