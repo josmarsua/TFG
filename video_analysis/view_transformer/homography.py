@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-class ViewTransformer:
-    def __init__(self, source: np.ndarray, target: np.ndarray):
+class Homography:
+    def __init__(self, source: np.ndarray, target: np.ndarray) -> None:
         if source.shape != target.shape:
             raise ValueError("Las matrices de puntos deben tener la misma forma.")
         if source.shape[1] != 2:

@@ -91,7 +91,7 @@
 <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
 <Container>
     <Row class="w-100">
-        <Col md="6" class="mx-auto">
+        <Col md="16" class="mx-auto">
             <Card class="shadow-lg">
                 <CardBody class="text-center">
                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Perfil de usuario</h2>
