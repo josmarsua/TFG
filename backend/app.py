@@ -2,6 +2,7 @@ import os
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from datetime import timedelta
 
 # Importar blueprints
 from auth import auth_bp, db
@@ -18,6 +19,7 @@ app.config['PROCESSED_FOLDER'] = os.path.abspath(os.path.join(os.path.dirname(__
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'supersecretkey'
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 
 # Crear carpetas si no existen
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

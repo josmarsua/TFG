@@ -5,7 +5,7 @@ import sys
 from flask import Blueprint, request, jsonify, send_file, Response
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
-
+import uuid
 
 video_bp = Blueprint('video', __name__)
 
@@ -38,13 +38,14 @@ def upload_file():
         video_bp.logger.error("El archivo enviado no tiene nombre.")
         return jsonify({'error': 'No selected file'}), 400
 
-    filename = secure_filename(file.filename)
+    unique_id = str(uuid.uuid4())[:8] #Identificador unico por subida
+    filename = f"{unique_id}_{secure_filename(file.filename)}"
     input_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(input_path)
 
     # Rutas de salida
     output_video_path = os.path.join(PROCESSED_FOLDER, f"processed_{filename}")
-    court_image_path = os.path.join(video_analysis_dir, 'court.png')  # Nueva ruta de la cancha
+    court_image_path = os.path.join(video_analysis_dir, 'court.png')  
 
     try:
         process_video(input_path, output_video_path, court_image_path)
