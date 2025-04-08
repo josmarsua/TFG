@@ -6,6 +6,9 @@ from flask import Blueprint, request, jsonify, send_file, Response
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 import uuid
+import json
+from threading import Thread
+
 
 video_bp = Blueprint('video', __name__)
 
@@ -22,7 +25,13 @@ process_video = main.process_video
 
 UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '../uploads'))
 PROCESSED_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '../processed'))
+STATUS_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '../status'))
 
+
+# Crear directorios si no existen
+for folder in [UPLOAD_FOLDER, PROCESSED_FOLDER, STATUS_FOLDER]:
+    os.makedirs(folder, exist_ok=True)
+    
 # =======================
 # SUBIR UN VIDEO
 # =======================
@@ -30,33 +39,39 @@ PROCESSED_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '../p
 @jwt_required()
 def upload_file():
     if 'file' not in request.files:
-        video_bp.logger.error("No se envió ningún archivo en la solicitud.")
         return jsonify({'error': 'No file part'}), 400
 
     file = request.files['file']
     if file.filename == '':
-        video_bp.logger.error("El archivo enviado no tiene nombre.")
         return jsonify({'error': 'No selected file'}), 400
 
-    unique_id = str(uuid.uuid4())[:8] #Identificador unico por subida
-    filename = f"{unique_id}_{secure_filename(file.filename)}"
+    video_id = str(uuid.uuid4())[:8]
+    filename = f"{video_id}_{secure_filename(file.filename)}"
     input_path = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(input_path)
-
-    # Rutas de salida
     output_video_path = os.path.join(PROCESSED_FOLDER, f"processed_{filename}")
     court_image_path = os.path.join(video_analysis_dir, 'court.png')  
+    status_path = os.path.join(STATUS_FOLDER, f"status_{video_id}.json")
 
-    try:
-        process_video(input_path, output_video_path, court_image_path)
-    except Exception as e:
-        video_bp.logger.error(f"Error al procesar el video: {e}")
-        return jsonify({'error': f'Error al procesar el video: {str(e)}'}), 500
+    file.save(input_path)
+
+    # Crear el archivo de estado inicial
+    with open(status_path, "w") as f:
+        json.dump({"step": "Procesando...", "progress": 0}, f)
+
+    # Ejecutar en segundo plano
+    def background_task():
+        try:
+            process_video(input_path, output_video_path, court_image_path, status_path)
+        except Exception as e:
+            with open(status_path, "w") as f:
+                json.dump({"step": f"❌ Error: {str(e)}"}, f)
+
+    Thread(target=background_task).start()
 
     return jsonify({
+        'video_id': video_id,
         'processed_file': f"/video/download/{os.path.basename(output_video_path)}"
     })
-
 @video_bp.route('/download/<filename>', methods=['GET'])
 def download_file(filename):
     path = os.path.join(PROCESSED_FOLDER, filename)
@@ -102,4 +117,15 @@ def serve_processed_video(filename):
 
     return response
 
+# =======================
+# ESTADO DE PROCESAMIENTO
+# =======================
+@video_bp.route('/status/<video_id>', methods=['GET'])
+def get_status(video_id):
+    status_path = os.path.join(STATUS_FOLDER, f"status_{video_id}.json")
+    if not os.path.exists(status_path):
+        return jsonify({"step": "Esperando procesamiento"}), 404
 
+    with open(status_path) as f:
+        data = json.load(f)
+    return jsonify(data)

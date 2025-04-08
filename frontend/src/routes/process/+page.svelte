@@ -5,19 +5,23 @@
 
     let file = null;
     let processedPreviewURL = null;
+    let tempProcessedFile = ""; 
     let isAuthenticated = false;
     let isLoading = false;
     let errorMessage = "";
-    let redirecting = false;  // Para mostrar mensaje de redirección
+    let redirecting = false;
+
+    let processingStatus = "";
+    let videoId = "";
+    let intervalId = null;
 
     onMount(() => {
         authToken.subscribe(token => {
-            isAuthenticated = !!token; 
-            
+            isAuthenticated = !!token;
             if (!isAuthenticated) {
-                redirecting = true; // Mostrar mensaje de redirección
+                redirecting = true;
                 setTimeout(() => {
-                    window.location.href = "/login"; // Redirigir tras 8 segundos
+                    window.location.href = "/login";
                 }, 8000);
             }
         });
@@ -30,12 +34,13 @@
         }
 
         isLoading = true;
+        processedPreviewURL = ""; 
 
         const formData = new FormData();
         formData.append("file", file);
 
         try {
-            const token = localStorage.getItem("token"); 
+            const token = localStorage.getItem("token");
 
             const response = await fetch('http://127.0.0.1:5000/video/upload', {
                 method: 'POST',
@@ -50,16 +55,37 @@
             }
 
             const data = await response.json();
-            let processedFile = `http://127.0.0.1:5000${data.processed_file}`;
-            processedPreviewURL = processedFile.replace('/processed/','/download/');
+            videoId = data.video_id;
+            tempProcessedFile = `http://127.0.0.1:5000${data.processed_file}`; 
+            processingStatus = "🚀 Comenzando procesamiento...";
+
+            intervalId = setInterval(pollStatus, 1000);
 
         } catch (error) {
             errorMessage = "Error al procesar el video. Asegúrate de estar autenticado.";
-        } finally {
             isLoading = false;
         }
     }
+
+    async function pollStatus() {
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/video/status/${videoId}`);
+            if (response.ok) {
+                const data = await response.json();
+                processingStatus = data.step;
+
+                if (processingStatus.includes("✅") || processingStatus.includes("❌")) {
+                    clearInterval(intervalId);
+                    processedPreviewURL = tempProcessedFile; 
+                    isLoading = false; 
+                }
+            }
+        } catch (err) {
+            console.error("Error haciendo polling:", err);
+        }
+    }
 </script>
+
 <svelte:head>
     <script src="https://cdn.tailwindcss.com"></script>
 </svelte:head>
@@ -81,6 +107,15 @@
                         </Button>
                     </Col>
                 </Row>
+                <Row>
+                    {#if processingStatus}
+                        <Col class="text-center mt-4">
+                            <div class="text-blue-600 font-medium animate-pulse">
+                                {processingStatus}
+                            </div>
+                        </Col>
+                    {/if}
+                </Row>                
             </Container>
 
             {#if isLoading}
