@@ -46,7 +46,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     print("🏀 Detectando puntos clave de la cancha...")
     set_status("🏀 Detectando puntos clave de la cancha...", 10)
     keypoint_model_path = os.path.join(base_dir, 'models', 'keypoint.pt')
-    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskpnuevo2.pkl')
+    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskpnuevo5.pkl')
 
     court_keypoint_detector = CourtKeypointDetector(keypoint_model_path)
     court_keypoint_detector_perframe = court_keypoint_detector.get_court_keypoints(video_frames, 
@@ -58,7 +58,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 4️⃣ DETECCIÓN Y SEGUIMIENTO DE OBJETOS
     # =======================    
     tracker_model_path = os.path.join(base_dir, 'models', 'aisports.pt')
-    stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo2.pkl')
+    stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo5.pkl')
     print("🏃‍♂️ Detectando y trackeando objetos...")
     set_status("🏃‍♂️ Detectando y trackeando objetos...", 20)
     tracker = Tracker(tracker_model_path)
