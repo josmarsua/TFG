@@ -32,15 +32,15 @@
                     if (data.profile_picture) {
                         profilePicture = `http://127.0.0.1:5000/uploads/${data.profile_picture}`;
                     } else {
-                        profilePicture = "/uploads/default_profile.webp";
+                        profilePicture = "/default_profile.webp";
                     }
 
                 } catch (error) {
                     console.error("Error al obtener la imagen de perfil:", error);
-                    profilePicture = "/uploads/default_profile.webp"; // Imagen por defecto en caso de error
+                    profilePicture = "/default_profile.webp"; // Imagen por defecto en caso de error
                 }
             } else {
-                profilePicture = "/uploads/default_profile.webp"; // Si no está autenticado, usar la imagen por defecto
+                profilePicture = "/default_profile.webp"; // Si no está autenticado, usar la imagen por defecto
             }
         });
     });
