@@ -3,6 +3,7 @@ sys.path.append('../')
 from utils.bbox_utils import measure_distance, get_center_of_bbox, get_key_points
 import cv2 
 import numpy as np
+import supervision as sv
 
 class BallPossession:
     def __init__(self):
@@ -151,50 +152,54 @@ class BallPossession:
 
     def draw_frame(self, frame, frame_num, team_ball_control):
         """
-        Dibuja un overlay semitransparente con las estadísticas de posesión
-        en la esquina superior derecha del video completo.
+        Dibuja un overlay con las estadísticas de posesión de balón 
+        en la esquina superior derecha usando supervision.
         """
-        overlay = frame.copy()
-        frame_height, frame_width = overlay.shape[:2]
-
-        # Tamaño del recuadro
-        rect_width = int(frame_width * 0.09)
-        rect_height = int(frame_height * 0.12)
-
-        # Posicionar en esquina superior derecha
-        rect_x2 = frame_width - 20  # margen derecho
-        rect_x1 = rect_x2 - rect_width
-        rect_y1 = 20  # margen superior
-        rect_y2 = rect_y1 + rect_height
-
-        # Dibujar fondo blanco semitransparente
-        cv2.rectangle(overlay, (rect_x1, rect_y1), (rect_x2, rect_y2), (255, 255, 255), -1)
-        alpha = 0.9
-        cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+        frame_height, frame_width = frame.shape[:2]
 
         # Calcular estadísticas de posesión
-        team_control_till_frame = team_ball_control[:frame_num+1]
+        team_control_till_frame = team_ball_control[:frame_num + 1]
         team1_frames = (team_control_till_frame == 1).sum()
         team2_frames = (team_control_till_frame == 2).sum()
-        total = team_control_till_frame.shape[0]
+        total = len(team_control_till_frame)
         team1_percent = team1_frames / total if total > 0 else 0
         team2_percent = team2_frames / total if total > 0 else 0
 
-        # Posiciones del texto
-        text_x = rect_x1 + int(rect_width * 0.08)
-        text_y1 = rect_y1 + int(rect_height * 0.3)
-        text_y2 = rect_y1 + int(rect_height * 0.6)
-        text_y3 = rect_y1 + int(rect_height * 0.9)
+        # Texto dividido en líneas
+        lines = [
+            "Ball Possession",
+            f"Team 1: {team1_percent * 100:.2f}%",
+            f"Team 2: {team2_percent * 100:.2f}%"
+        ]
 
-        # Estilo del texto
-        font = cv2.FONT_HERSHEY_DUPLEX
-        font_scale = 0.5
-        thickness = 1
+        # Estilo dinámico
+        font_scale = sv.calculate_optimal_text_scale((frame_width, frame_height))
+        thickness = sv.calculate_optimal_line_thickness((frame_width, frame_height))
 
-        # Dibujar texto
-        cv2.putText(frame, "Ball Possession", (text_x, text_y1), font, font_scale, (0, 0, 0), thickness)
-        cv2.putText(frame, f"Team 1: {team1_percent*100:.2f}%", (text_x, text_y2), font, font_scale, (0, 0, 0), thickness)
-        cv2.putText(frame, f"Team 2: {team2_percent*100:.2f}%", (text_x, text_y3), font, font_scale, (0, 0, 0), thickness)
+        # Usar cv2 para obtener altura exacta del texto
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        line_heights = []
+        for line in lines:
+            (_, line_height), baseline = cv2.getTextSize(line, font, font_scale, thickness)
+            line_heights.append(line_height + baseline + 8)  # extra padding por línea
+
+        # Posición base arriba a la derecha
+        base_x = frame_width - 250
+        base_y = 40
+
+        # Dibujar cada línea por separado
+        current_y = base_y
+        for i, line in enumerate(lines):
+            anchor = sv.Point(x=base_x, y=current_y)
+            frame = sv.draw_text(
+                scene=frame,
+                text=line,
+                text_anchor=anchor,
+                text_color=sv.Color.BLACK,
+                background_color=sv.Color.WHITE,
+                text_scale=font_scale,
+                text_thickness=thickness
+            )
+            current_y += line_heights[i]
 
         return frame
-
