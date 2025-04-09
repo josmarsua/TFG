@@ -6,6 +6,8 @@ from court_keypoint_detector import CourtKeypointDetector
 from ball_possession import BallPossession
 from view_transformer import Transformer
 import json
+from shot_detector import ScoreDetector
+import cv2 
 
 def process_video(input_video, output_video, court_image_path, status_path):
     """
@@ -44,7 +46,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     print("🏀 Detectando puntos clave de la cancha...")
     set_status("🏀 Detectando puntos clave de la cancha...", 10)
     keypoint_model_path = os.path.join(base_dir, 'models', 'keypoint.pt')
-    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskpnuevo5.pkl')
+    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskpnuevo2.pkl')
 
     court_keypoint_detector = CourtKeypointDetector(keypoint_model_path)
     court_keypoint_detector_perframe = court_keypoint_detector.get_court_keypoints(video_frames, 
@@ -56,7 +58,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 4️⃣ DETECCIÓN Y SEGUIMIENTO DE OBJETOS
     # =======================    
     tracker_model_path = os.path.join(base_dir, 'models', 'aisports.pt')
-    stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo5.pkl')
+    stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo2.pkl')
     print("🏃‍♂️ Detectando y trackeando objetos...")
     set_status("🏃‍♂️ Detectando y trackeando objetos...", 20)
     tracker = Tracker(tracker_model_path)
@@ -79,7 +81,9 @@ def process_video(input_video, output_video, court_image_path, status_path):
     tracks = assign_teams(video_frames, 
                           tracks)
 
-    # Realizar transformaciones
+    # =======================
+    # 7️⃣ MAPEO DE POSICIONES
+    # =======================
     print("📍 Realizando calculos para homografia...")
     set_status("📍 Realizando cálculos para homografia...", 55)
     transformer = Transformer(court_image_path)
@@ -87,10 +91,10 @@ def process_video(input_video, output_video, court_image_path, status_path):
     court_player_positions = transformer.transform_players(court_keypoint_detector_perframe, tracks["players"])
     
     # =======================
-    # 7️⃣ CALCULAR POSESIÓN
+    # 8️⃣ CALCULAR POSESIÓN
     # =======================
     print("🎯 Calculando posesion de balon...")
-    set_status("🎯 Calculando posesion de balon...", 65)
+    set_status("🎯 Calculando posesion de balon...", 60)
     ball_possession_detector = BallPossession()
     ball_possession = ball_possession_detector.detect_ball_possession(tracks['players'],tracks["ball"])
 
@@ -102,8 +106,20 @@ def process_video(input_video, output_video, court_image_path, status_path):
                     for player_id, info in frame_players.items()}
         player_assignment.append(assignment)
 
+
     # =======================
-    # 8️⃣ DIBUJAR ANOTACIONES
+    # 9️⃣ DIBUJAR ANOTACIONES
+    # =======================
+
+    print("🏀 Detectando canastas...")
+    set_status("🏀 Detectando canastas...", 65)
+
+    score_detector = ScoreDetector()
+    score_frames = score_detector.detect_scores(tracks["ball"], tracks["net"])
+   
+
+    # =======================
+    # 🎨 DIBUJAR ANOTACIONES
     # =======================
     print("🎨 Dibujando anotaciones...")
     set_status("🎨 Dibujando anotaciones...", 70)
@@ -124,8 +140,11 @@ def process_video(input_video, output_video, court_image_path, status_path):
     output_video_frames = ball_possession_detector.draw_possession(output_video_frames,
                                                                    player_assignment,
                                                                    ball_possession)
+    
+    output_video_frames = score_detector.draw_scores_on_frames(output_video_frames, score_frames)
+
     # =======================
-    # 9️⃣ GUARDAR VIDEOS
+    # 💾 GUARDAR VIDEOS
     # =======================
     print("💾 Guardando video...")
     set_status("💾 Guardando video...", 85)
