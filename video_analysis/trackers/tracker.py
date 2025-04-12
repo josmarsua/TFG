@@ -13,6 +13,7 @@ class Tracker:
     def __init__(self, model_path):
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
+        self.smoother = sv.DetectionsSmoother(length=5)
 
     def detect_frames(self, frames):
         batch_size = 20
@@ -48,7 +49,8 @@ class Tracker:
 
             # Track (añade un objeto para trackear las detecciones)
             detection_with_tracks = self.tracker.update_with_detections(detection_sv)
-
+            detection_with_tracks = self.smoother.update_with_detections(detection_with_tracks)
+            
             tracks["players"].append({})
             tracks["referees"].append({})
             tracks["ball"].append({})
@@ -67,13 +69,19 @@ class Tracker:
                 
                 if class_id == class_names_inverse['net']:
                     tracks["net"][frame_num][track_id] = {"bbox":bounding_box}
-            
+
+
+            ball_found = False
             for frame_detection in detection_sv:
                 bounding_box = frame_detection[0].tolist()
                 class_id = frame_detection[3]
                 
                 if class_id == class_names_inverse['basketball']:
                     tracks["ball"][frame_num][1] = {"bbox":bounding_box} #Solo hay un balon, almacenamos en el track 1
+                    ball_found = True
+            
+            if not ball_found:
+                tracks["ball"][frame_num][1] = {}
 
         if stub_path is not None:
             with open(stub_path,'wb') as f:
@@ -250,11 +258,12 @@ class Tracker:
                 frame = self.draw_ellipse(frame, referee["bbox"],(255, 0, 255), label="Referee")
 
             # Draw Ball
-            for _, ball in ball_dict.items():
-                if ball["bbox"] is None:
-                    continue
-                frame = self.draw_triangle(frame,ball["bbox"],(0,255,0)) 
-                frame = self.draw_circle(frame,ball["bbox"],(0,255,0))
+            if 1 in ball_dict:
+                ball = ball_dict[1]
+                if ball.get("bbox"):
+                    frame = self.draw_triangle(frame, ball["bbox"], (0, 255, 0))
+                    frame = self.draw_circle(frame, ball["bbox"], (0, 255, 0))
+
 
             # Draw Net
             for track_id, net in net_dict.items():
@@ -265,19 +274,3 @@ class Tracker:
 
         return output_video_frames
                 
-    def interpolate_ball_tracks(self, ball_tracks):
-        """
-        Inteporla las posiciones del balón en los frames.
-        """
-        # Extraer las coordenadas del balón (x1, y1, x2, y2)
-        ball_tracks = [x.get(1, {}).get('bbox', []) for x in ball_tracks]
-        df_ball_tracks = pd.DataFrame(ball_tracks, columns=['x1', 'y1', 'x2', 'y2'])
-
-        # Interpolación
-        df_ball_tracks = df_ball_tracks.interpolate()
-        df_ball_tracks = df_ball_tracks.bfill()
-
-        # Reconstruir el formato original
-        ball_tracks = [{1: {"bbox": x}} for x in df_ball_tracks.to_numpy().tolist()]
-        return ball_tracks
-

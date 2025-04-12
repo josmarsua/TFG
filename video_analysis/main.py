@@ -57,7 +57,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # =======================
     # 4️⃣ DETECCIÓN Y SEGUIMIENTO DE OBJETOS
     # =======================    
-    tracker_model_path = os.path.join(base_dir, 'models', 'aisports.pt')
+    tracker_model_path = os.path.join(base_dir, 'models', 'aisportsv2.pt')
     stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo5.pkl')
     print("🏃‍♂️ Detectando y trackeando objetos...")
     set_status("🏃‍♂️ Detectando y trackeando objetos...", 20)
@@ -67,17 +67,10 @@ def process_video(input_video, output_video, court_image_path, status_path):
                                        stub_path=stub_path)
 
     # =======================
-    # 5️⃣ INTERPOLACIÓN DEL BALÓN
-    # =======================
-    print("🏀 Interpolando posiciones del balon...")
-    set_status("🏀 Interpolando posiciones del balon...", 35)
-    tracks["ball"] = tracker.interpolate_ball_tracks(tracks["ball"])
-
-    # =======================
     # 6️⃣ ASIGNACIÓN DE EQUIPOS
     # =======================
     print("⛹️ Asignando equipos...")
-    set_status("⛹️ Asignando equipos...", 40)
+    set_status("⛹️ Asignando equipos...", 30)
     tracks = assign_teams(video_frames, 
                           tracks)
 
@@ -85,7 +78,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     # 7️⃣ MAPEO DE POSICIONES
     # =======================
     print("📍 Realizando calculos para homografia...")
-    set_status("📍 Realizando cálculos para homografia...", 55)
+    set_status("📍 Realizando cálculos para homografia...", 50)
     transformer = Transformer(court_image_path)
     court_keypoint_detector_perframe = transformer.validate_kp(court_keypoint_detector_perframe)
     court_player_positions = transformer.transform_players(court_keypoint_detector_perframe, tracks["players"])
