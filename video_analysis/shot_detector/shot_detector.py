@@ -6,7 +6,7 @@ class ScoreDetector:
     def __init__(self, display_duration=20):
         """
         Inicializa el detector de puntuaciones.
-        :param display_duration: Número de frames que se mostrará el cartel de "CANASTA"
+        :param display_duration: Número de frames que se mostrará el cartel de "FIELD GOAL MADE"
         """
         self.display_duration = display_duration
         self.last_score_frame = -999  # Para recordar cuándo fue la última canasta
@@ -54,7 +54,7 @@ class ScoreDetector:
     
     def draw_scores_on_frames(self, video_frames, score_flags):
         """
-        Dibuja "CANASTA" con fondo blanco y estilo dinámico usando Supervision
+        Dibuja "FIELD GOAL MADE" con fondo blanco y estilo dinámico usando Supervision
         en la esquina superior izquierda.
         """
         output_frames = []
@@ -63,7 +63,7 @@ class ScoreDetector:
             frame = frame.copy()
 
             if score_flags[frame_idx] == 1:
-                text = "CANASTA"
+                text = "FIELD GOAL MADE"
 
                 frame_height, frame_width = frame.shape[:2]
 

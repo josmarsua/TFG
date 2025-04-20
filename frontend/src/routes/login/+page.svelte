@@ -92,7 +92,7 @@
                 </div>
             </FormGroup>
 
-            <Button type="submit" color="primary" class="w-full py-2 text-lg font-semibold rounded-lg shadow-md">
+            <Button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl shadow-md transition-all">
                 Iniciar sesión
             </Button>
         </Form>

@@ -15,7 +15,7 @@
 <main>
     <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
         <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Bienvenido/a a [nombre APP]</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Bienvenido/a a BasketVision</h1>
             <p class="text-lg text-gray-600">
                 [descripción APP]
             </p>

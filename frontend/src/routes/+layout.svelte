@@ -4,11 +4,10 @@
 </script>
 
 <svelte:head>
-    <title>TFG josmarsua</title>
+    <title>BasketVision</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </svelte:head>
-
-<div class="bg-teal-100 min-h-screen flex flex-col">
+<div class="bg-[#D9EFFF] min-h-screen flex flex-col">
     <Header />
     <main class="flex-1 py-6">
         <slot></slot>

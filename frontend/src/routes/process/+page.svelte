@@ -112,7 +112,7 @@
                         <Input type="file" accept="video/*" on:change="{e => file = e.target.files[0]}" />
                     </Col>
                     <Col class="text-center">
-                        <Button color="primary" on:click="{uploadFile}" disabled={isLoading}>
+                        <Button class="w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl shadow-md transition-all" on:click="{uploadFile}" disabled={isLoading}>
                             {isLoading ? "Procesando..." : "Subir"}
                         </Button>
                     </Col>

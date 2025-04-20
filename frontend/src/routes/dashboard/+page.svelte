@@ -88,7 +88,7 @@
         fetchUserProfile();
     });
 </script>
-<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+<div class="max-w-4xl mx-auto p-6">
 <Container>
     <Row class="w-100">
         <Col md="16" class="mx-auto">
@@ -107,32 +107,32 @@
                         <Form on:submit={updateProfile}>
                             <FormGroup>
                                 <Label for="username" class="flex items-center space-x-2 text-sm font-medium text-gray-600"><Fa icon={faUser} size="1x" secondaryOpacity={1} primaryColor="blue" secondaryColor="linen"/><span>Usuario</span></Label>
-                                <Input type="text" bind:value={newUsername} required />
+                                <Input type="text" class="rounded-md border-gray-300 focus:ring focus:ring-blue-200 shadow-sm" bind:value={newUsername} required />
                             </FormGroup>
 
                             <FormGroup>
                                 <Label for="email" class="flex items-center space-x-2 text-sm font-medium text-gray-600"><Fa icon={faEnvelope} size="1x" secondaryOpacity={1} primaryColor="blue" secondaryColor="linen"/><span>Correo electrónico</span></Label>
-                                <Input type="email" bind:value={newEmail} required />
+                                <Input type="email" class="rounded-md border-gray-300 focus:ring focus:ring-blue-200 shadow-sm" bind:value={newEmail} required />
                             </FormGroup>
 
                             <FormGroup>
                                 <Label for="password" class="flex items-center space-x-2 text-sm font-medium text-gray-600"><Fa icon={faKey} size="1x" secondaryOpacity={1} primaryColor="blue" secondaryColor="linen"/><span>Nueva contraseña</span></Label>
-                                <Input type="password" bind:value={newPassword} placeholder="Dejar en blanco para no cambiar" />
+                                <Input type="password" class="rounded-md border-gray-300 focus:ring focus:ring-blue-200 shadow-sm" bind:value={newPassword} placeholder="Dejar en blanco para no cambiar" />
                             </FormGroup>
 
                             <FormGroup>
                                 <Label for="profile_picture" class="flex items-center space-x-2 text-sm font-medium text-gray-600"><Fa icon={faCamera} size="1x" secondaryOpacity={1} primaryColor="blue" secondaryColor="linen"/><span>Foto de perfil</span></Label>
-                                <Input type="file" accept="image/*" on:change="{e => newProfilePicture = e.target.files[0]}" />
+                                <Input type="file" class="rounded-md border-gray-300 focus:ring focus:ring-blue-200 shadow-sm" accept="image/*" on:change="{e => newProfilePicture = e.target.files[0]}" />
                             </FormGroup>
 
                             {#if successMessage}
                                 <div class="alert alert-success">{successMessage}</div>
                             {/if}
 
-                            <Button type="submit" color="primary" class="w-100">Guardar Cambios</Button>
+                            <Button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl shadow-md transition-all">Guardar Cambios</Button>
                         </Form>
 
-                        <Button color="danger" class="w-100 mt-3" on:click={logout}>Cerrar sesión</Button>
+                        <Button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 mt-3 rounded-xl shadow-md transition-all" on:click={logout}>Cerrar sesión</Button>
                 </CardBody>
             </Card>
         </Col>

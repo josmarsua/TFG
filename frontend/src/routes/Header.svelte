@@ -61,39 +61,42 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </svelte:head>
 
-<header class="bg-blue-900 p-4 text-white">
+<header class="bg-[#0A0F2C] p-4 text-white shadow-md">
     <div class="max-w-4xl mx-auto flex justify-between items-center">
         <!-- Logo / Título -->
-        <div class="text-xl font-bold">
-            <a href="/">TFG josmarsua</a>
-        </div>
+        <a href="/" class="flex items-center space-x-3">
+            <img src="/logo.png" class="w-10 h-10" alt="Logo" />
+            <span class="text-2xl font-semibold tracking-tight">Basket<span class="text-cyan-300">Vision</span></span>
+        </a>
+          
 
         <!-- Navegación -->
         <div class="space-x-4 flex items-center">
             {#if isAuthenticated}
                 <!-- Botón de Analizar (Solo si está autenticado) -->
-                <a href="/process" class="bg-blue-500 hover:bg-blue-700 font-semibold py-2 px-4 rounded">
+                <a href="/process"
+                   class="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 px-5 rounded-full shadow transition duration-200">
                     Analizar
                 </a>
 
+
                 <!-- Icono de usuario con imagen de perfil -->
                 <a href="/dashboard" class="flex items-center space-x-2 hover:opacity-80">
-                    <img src={profilePicture} alt="Perfil" class="w-10 h-10 rounded-full border border-white shadow-md">
+                    <img src={profilePicture} alt="Perfil" class="w-10 h-10 rounded-full border-2 border-white shadow" />
                 </a>
 
                 <!-- Botón de Cerrar Sesión -->
-                <button 
+                <button
                     on:click={logout}
-                    class="bg-red-500 hover:bg-red-700 font-semibold py-1 px-2 rounded"
-                >
-                    <Fa icon={faPowerOff} size="1x" secondaryOpacity={1}/>
+                    class="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition">
+                    <Fa icon={faPowerOff} />
                 </button>
             {:else}
                 <!-- Botón de Iniciar Sesión / Registrarse -->
-                <a href="/login" class="bg-yellow-300 hover:bg-yellow-50 text-black font-semibold py-2 px-4 rounded">
+                <a href="/login" class="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-2 px-4 rounded-full transition">
                     Iniciar sesión
                 </a>
-                <a href="/register" class="bg-violet-300 hover:bg-purple-400 text-black font-semibold py-2 px-4 rounded">
+                <a href="/register" class="bg-violet-400 hover:bg-violet-500 text-white font-semibold py-2 px-4 rounded-full transition">
                     Registrarse
                 </a>
             {/if}
