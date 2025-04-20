@@ -117,7 +117,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     print("🎨 Dibujando anotaciones...")
     set_status("🎨 Dibujando anotaciones...", 70)
 
-    output_video_frames = tracker.draw_annotations(video_frames, tracks)
+    output_video_frames = tracker.draw_annotations(video_frames, tracks, ball_possession)
     set_status("🎨 Dibujando anotaciones...", 75)
     output_video_frames = court_keypoint_detector.draw_court_keypoints(output_video_frames, court_keypoint_detector_perframe)
     set_status("🎨 Dibujando anotaciones...", 80)

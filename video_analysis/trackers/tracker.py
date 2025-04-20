@@ -77,12 +77,13 @@ class Tracker:
 
         return tracks
 
-    def draw_annotations(self, frames, tracks):
+    def draw_annotations(self, frames, tracks, ball_possession):
         triangle_annotator = sv.TriangleAnnotator(base=14, height=18, color=sv.Color(r=128, g=255, b=0))
         circle_annotator = sv.CircleAnnotator(thickness=2, color=sv.Color(r=128, g=255, b=0))
         ellipse_annotator = sv.EllipseAnnotator()
         bbox_annotator = sv.RoundBoxAnnotator()
         label_annotator = sv.LabelAnnotator(text_position=sv.Position.TOP_CENTER)
+        player_triangle_annotator = sv.TriangleAnnotator(base=18, height=18, color=sv.Color.RED)
 
         
         output_frames = []
@@ -91,6 +92,7 @@ class Tracker:
 
             # Jugadores
             players = tracks["players"][frame_idx]
+            player_with_ball_id = ball_possession[frame_idx]
             for track_id, player in players.items():
                 player_color = player.get("team_color",(0,0,255))
                 player_ellipse_annotator = sv.EllipseAnnotator(color=sv.Color(r=player_color[2], g=player_color[1], b=player_color[0]),thickness=3)
@@ -102,6 +104,8 @@ class Tracker:
                 )
                 frame = player_ellipse_annotator.annotate(scene=frame, detections=det)
                 frame = player_label_annotator.annotate(scene=frame, detections=det, labels=[f"Player #{track_id}"])
+                if track_id == player_with_ball_id:
+                    frame = player_triangle_annotator.annotate(scene=frame, detections=det)
 
             # Árbitros
             referees = tracks["referees"][frame_idx]
