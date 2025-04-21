@@ -7,7 +7,7 @@ from view_transformer import Transformer
 import json
 from shot_analysis import ScoreDetector, ShotTracker
 
-def process_video(input_video, output_video, court_image_path, status_path):
+def process_video(input_video, output_video, court_image_path, shot_court_image_path, status_path):
     """
     Procesar un video de un partido de baloncesto para realizar la lógica de detecciones,
     análisis y mapeo de posiciones.
@@ -108,7 +108,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     score_detector = ScoreDetector()
     score_frames = score_detector.detect_scores(tracks["ball"], tracks["net"])
    
-    shot_tracker = ShotTracker(court_image_path)
+    shot_tracker = ShotTracker(shot_court_image_path)
 
     # =======================
     # 🎨 DIBUJAR ANOTACIONES

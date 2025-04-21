@@ -50,6 +50,7 @@ def upload_file():
     input_path = os.path.join(UPLOAD_FOLDER, filename)
     output_video_path = os.path.join(PROCESSED_FOLDER, f"processed_{filename}")
     court_image_path = os.path.join(video_analysis_dir, 'court.png')  
+    shot_court_image_path = os.path.join(video_analysis_dir, 'shotcourt.png')  
     status_path = os.path.join(STATUS_FOLDER, f"status_{video_id}.json")
 
     file.save(input_path)
@@ -61,7 +62,7 @@ def upload_file():
     # Ejecutar en segundo plano
     def background_task():
         try:
-            process_video(input_path, output_video_path, court_image_path, status_path)
+            process_video(input_path, output_video_path, court_image_path, shot_court_image_path, status_path)
         except Exception as e:
             with open(status_path, "w") as f:
                 json.dump({"step": f"❌ Error: {str(e)}"}, f)

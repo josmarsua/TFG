@@ -98,12 +98,19 @@ class ShotTracker:
         for pos in self.make_positions:
             x = int(round(pos[0]))
             y = int(round(pos[1]))
-            cv2.circle(frame, (x + x1, y + y1), 6, (0, 255, 0), 2)
+            cv2.circle(frame, (x + x1, y + y1), 6, (0, 255, 0), -1)
 
         for pos in self.fail_positions:
             x = int(round(pos[0]))
             y = int(round(pos[1]))
-            cv2.circle(frame, (x + x1, y + y1), 6, (0, 0, 255), 2)
+            offset = 6
+            p1 = sv.Point(x=x + x1 - offset, y=y + y1 - offset)
+            p2 = sv.Point(x=x + x1 + offset, y=y + y1 + offset)
+            p3 = sv.Point(x=x + x1 - offset, y=y + y1 + offset)
+            p4 = sv.Point(x=x + x1 + offset, y=y + y1 - offset)
+
+            frame = sv.draw_line(frame, p1, p2, color=sv.Color.RED, thickness=2)
+            frame = sv.draw_line(frame, p3, p4, color=sv.Color.RED, thickness=2)
 
         return frame
 
