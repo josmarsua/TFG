@@ -14,13 +14,12 @@
 
 </script>
 
-<main class="bg-gradient-to-b from-blue-100 via-white to-blue-50 min-h-screen py-10 px-6">
-    <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-xl border border-gray-200">
-        
+<main>
+    <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">        
         <header class="text-center mb-10">
             <h1 class="text-4xl font-bold text-blue-900">🏀 BasketVision</h1>
             <p class="text-lg mt-2 text-gray-600">
-                Análisis inteligente de partidos de baloncesto en video.
+                Análisis inteligente de partidos de baloncesto en vídeo.
             </p>
         </header>
 
