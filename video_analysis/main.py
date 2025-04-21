@@ -5,7 +5,7 @@ from court_keypoint_detector import CourtKeypointDetector
 from ball_possession import BallPossession
 from view_transformer import Transformer
 import json
-from shot_analysis import ScoreDetector, ShotTracker
+from shot_analysis import ShotTracker
 
 def process_video(input_video, output_video, court_image_path, shot_court_image_path, status_path):
     """
@@ -99,14 +99,11 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
 
 
     # =======================
-    # 9️⃣ DETECTAR CANASTAS
+    # 9️⃣ DETECTAR TIROS
     # =======================
 
-    print("🏀 Detectando canastas...")
-    set_status("🏀 Detectando canastas...", 65)
-
-    score_detector = ScoreDetector()
-    score_frames = score_detector.detect_scores(tracks["ball"], tracks["net"])
+    print("🏀 Detectando tiros...")
+    set_status("🏀 Detectando tiros...", 65)
    
     shot_tracker = ShotTracker(shot_court_image_path)
 
@@ -132,8 +129,6 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     output_video_frames = ball_possession_detector.draw_possession(output_video_frames,
                                                                    player_assignment,
                                                                    ball_possession)
-    
-    output_video_frames = score_detector.draw_scores_on_frames(output_video_frames, score_frames)
 
     output_video_frames = shot_tracker.draw_minimap_overlay(output_video_frames,
                                                             court_player_positions,
@@ -141,6 +136,9 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
                                                             ball_possession,
                                                             transformer.width,
                                                             transformer.height)
+    make_flags = shot_tracker.get_make_flags()
+    output_video_frames = shot_tracker.draw_scores_on_frames(output_video_frames, make_flags)
+
     # =======================
     # 💾 GUARDAR VIDEOS
     # =======================
