@@ -133,7 +133,8 @@ class BallPossession:
         font = cv2.FONT_HERSHEY_SIMPLEX
         line_heights = [cv2.getTextSize(line, font, font_scale, thickness)[0][1] + 12 for line in lines]
 
-        base_x, base_y = frame_width - 250, 40
+        base_x = int(frame_width * 0.90)  # 80% del ancho
+        base_y = int(frame_height * 0.05) # 5% del alto
         current_y = base_y
         for i, line in enumerate(lines):
             anchor = sv.Point(x=base_x, y=current_y)
