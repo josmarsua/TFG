@@ -167,7 +167,11 @@ class Transformer:
 
             # Posición en la que dibujamos el overlay
             frame_height, frame_width = frame.shape[:2]
-            x1 = int((frame_width - width) / 2)
+            gap = 20
+            total_width = width * 2 + gap
+            start_x = (frame_width - total_width) // 2
+
+            x1 = start_x 
             x2 = x1 + width
             y2 = frame_height - 40
             y1 = y2 - height

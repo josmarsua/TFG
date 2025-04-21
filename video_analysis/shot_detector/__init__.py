@@ -1,1 +1,0 @@
-from .shot_detector import ScoreDetector

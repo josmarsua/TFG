@@ -1,13 +1,11 @@
 from utils import read_video, save_video, get_metadata, assign_teams
 from trackers import Tracker
 import os
-import numpy as np
 from court_keypoint_detector import CourtKeypointDetector
 from ball_possession import BallPossession
 from view_transformer import Transformer
 import json
-from shot_detector import ScoreDetector
-import cv2 
+from shot_analysis import ScoreDetector, ShotTracker
 
 def process_video(input_video, output_video, court_image_path, status_path):
     """
@@ -101,7 +99,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
 
 
     # =======================
-    # 9️⃣ DIBUJAR ANOTACIONES
+    # 9️⃣ DETECTAR CANASTAS
     # =======================
 
     print("🏀 Detectando canastas...")
@@ -110,6 +108,7 @@ def process_video(input_video, output_video, court_image_path, status_path):
     score_detector = ScoreDetector()
     score_frames = score_detector.detect_scores(tracks["ball"], tracks["net"])
    
+    shot_tracker = ShotTracker(court_image_path)
 
     # =======================
     # 🎨 DIBUJAR ANOTACIONES
@@ -136,6 +135,12 @@ def process_video(input_video, output_video, court_image_path, status_path):
     
     output_video_frames = score_detector.draw_scores_on_frames(output_video_frames, score_frames)
 
+    output_video_frames = shot_tracker.draw_minimap_overlay(output_video_frames,
+                                                            court_player_positions,
+                                                            tracks,
+                                                            ball_possession,
+                                                            transformer.width,
+                                                            transformer.height)
     # =======================
     # 💾 GUARDAR VIDEOS
     # =======================
