@@ -106,7 +106,8 @@ class ShotTracker:
                     "type": event_type,
                     "player_id": self.last_possessor_id,
                     "position": shooter_pos,
-                    "time": frame_to_time(frame_idx, self.fps)
+                    "time": frame_to_time(frame_idx, self.fps),
+                    "team": team
                 }
                 self.events.append(event)
 

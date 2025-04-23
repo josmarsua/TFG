@@ -111,6 +111,19 @@
         }
     }
 
+    function resetProcessing() {
+        file = null;
+        processedPreviewURL = null;
+        tempProcessedFile = "";
+        isLoading = false;
+        errorMessage = "";
+        processingStatus = "";
+        videoId = "";
+        progress = 0;
+        events = [];
+        clearInterval(intervalId);
+    }
+
 
 </script>
 
@@ -132,6 +145,13 @@
                     <Col class="text-center">
                         <Button class="w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl shadow-md transition-all" on:click="{uploadFile}" disabled={isLoading}>
                             {isLoading ? "Procesando..." : "Subir"}
+                        </Button>
+                        <Button 
+                            class="w-auto bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-xl shadow-md transition-all ml-4"
+                            on:click="{resetProcessing}"
+                            disabled={!isLoading}
+                        >
+                            🗑️ Nuevo análisis
                         </Button>
                     </Col>
                 </Row>
@@ -183,12 +203,14 @@
                                                 </span>
                                                 <span class="text-gray-600 ml-2">ID del Jugador: {event.player_id}</span>
                                                 <span class="text-gray-500 ml-4 text-sm">Minuto: {event.time}</span>
+                                                <span class="text-gray-500 ml-6 text-sm">Equipo: {event.team}</span>
                                             {:else if event.type === 'Pase'}
                                                 <span class="font-bold text-blue-700">{event.type}</span>
                                                 <span class="text-gray-600 ml-2">
                                                     De Jugador ID: {event.from_player_id} a Jugador ID: {event.to_player_id}
                                                 </span>
                                                 <span class="text-gray-500 ml-4 text-sm">Minuto: {event.time}</span>
+                                                <span class="text-gray-500 ml-6 text-sm">Equipo: {event.team}</span>
                                             {/if}
                                         </div>
                                     </li>

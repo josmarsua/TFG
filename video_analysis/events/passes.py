@@ -29,7 +29,8 @@ class PassDetector:
                         "from_player_id": prev_holder,
                         "to_player_id": current_holder,
                         "time": frame_to_time(frame_idx, self.fps),
-                        "frame": frame_idx
+                        "frame": frame_idx,
+                        "team": current_team
                     }
                     self.events.append(event)
 
