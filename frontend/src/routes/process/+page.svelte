@@ -6,7 +6,7 @@
     import { Container, Row, Col, Button, Input } from '@sveltestrap/sveltestrap';
 
     let file = null;
-    let processedPreviewURL = null;
+    let videoprocessed = false;
     let tempProcessedFile = ""; 
     let isAuthenticated = false;
     let isLoading = false;
@@ -40,7 +40,7 @@
         }
 
         isLoading = true;
-        processedPreviewURL = ""; 
+        videoprocessed = false; 
 
         const formData = new FormData();
         formData.append("file", file);
@@ -95,7 +95,9 @@
 
                 if (processingStatus.includes("✅")) {
                     clearInterval(intervalId);
-                    processedPreviewURL = tempProcessedFile; // <- MOSTRAR VIDEO
+                    const filename = tempProcessedFile.split("/").pop(); 
+                    videoprocessed = true
+                    await loadVideo(videoId, filename);
                     await fetchEvents();
                 }
 
@@ -125,6 +127,31 @@
             console.error("Error al obtener los eventos:", error);
         }
     }
+
+    async function loadVideo(videoId, filename) {
+        const token = localStorage.getItem("token");
+
+        try {
+            const response = await fetch(`http://localhost:5000/video/processed/${videoId}/${filename}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 401) {
+                forceLogout();
+                return;
+            }
+
+            const blob = await response.blob();
+            const videoUrl = URL.createObjectURL(blob);
+            document.getElementById("myVideo").src = videoUrl;
+
+        } catch (error) {
+            console.error("Error cargando el video:", error);
+        }
+    }
+
 
     function resetProcessing() {
         file = null;
@@ -191,15 +218,12 @@
             </div>
             {/if}
 
-            {#if processedPreviewURL}
+            {#if videoprocessed}
                 <div class="mt-8">
                     <h2 class="text-2xl font-semibold text-gray-800">Resultados</h2>
                     <div class="mt-4">
                         <!-- svelte-ignore a11y_media_has_caption -->
-                        <video controls class="w-full max-w-lg mx-auto rounded shadow-lg">
-                            <source src={processedPreviewURL} type="video/mp4" />
-                            Tu navegador no soporta la reproducción de videos.
-                        </video>
+                        <video id="myVideo" controls class="w-full max-w-lg mx-auto rounded shadow-lg"></video>
                         <div class="mt-8">
                             <h2 class="text-xl font-semibold text-gray-800">Eventos del partido</h2>
                             {#if events.length > 0}

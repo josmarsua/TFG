@@ -78,6 +78,7 @@ def upload_file():
         'processed_file': f"/video/download/{video_id}/{os.path.basename(output_video_path)}"
     })
 @video_bp.route('/download/<video_id>/<filename>', methods=['GET'])
+@jwt_required()
 def download_file(video_id, filename):
     path = os.path.join(PROCESSED_FOLDER, video_id, filename)
     if not os.path.exists(path):
@@ -93,6 +94,7 @@ def download_file(video_id, filename):
 # PREVISUALIZAR UN VIDEO
 # =======================
 @video_bp.route('/processed/<video_id>/<filename>', methods=['GET'])
+@jwt_required()
 def serve_processed_video(video_id, filename):
     path = os.path.join(PROCESSED_FOLDER, video_id, filename)
     if not os.path.exists(path):
