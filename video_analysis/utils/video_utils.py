@@ -2,6 +2,7 @@ import cv2
 from typing import NamedTuple
 from moviepy import ImageSequenceClip
 import numpy as np
+import json
 
 class VideoMetadata(NamedTuple):
     fps: float
@@ -69,3 +70,24 @@ def save_video(output_video_frames, output_video_path, fps=24):
     except Exception as e:
         raise RuntimeError(f"❌ Error al guardar el video con MoviePy: {e}")
 
+def save_events(events, output_path):
+    # Convertir correctamente los tipos
+    def convert(obj):
+        if isinstance(obj, (np.integer, np.int64)):
+            return int(obj)
+        if isinstance(obj, (np.floating, np.float64)):
+            return float(obj)
+        return obj
+
+    with open(output_path, "w") as f:
+        json.dump(events, f, default=convert)
+
+def frame_to_time(frame_idx, fps):
+    """
+    Convierte el índice del frame y el fps en un string formato 'minuto:segundos'.
+    """
+    total_seconds = frame_idx / fps
+    minutes = int(total_seconds // 60)
+    seconds = int(total_seconds % 60)
+    
+    return f"{minutes}:{seconds:02d}"

@@ -3,9 +3,13 @@ import cv2
 from collections import deque
 from utils import get_center_of_bbox
 import supervision as sv
+from utils import frame_to_time
 
 class ShotTracker:
-    def __init__(self, court_pic_path):
+    def __init__(self, court_pic_path, fps):
+
+        self.fps = fps
+        
         self.make_count = 0
         self.attempt_count = 0
         self.make_positions = []
@@ -21,12 +25,18 @@ class ShotTracker:
         self.shot_in_progress = False
         self.min_descending_frames = 1
 
-        self.make_flags = []  # 🆕 Frame flags para FIELD GOAL MADE
+        self.make_flags = []  # Frame flags para FIELD GOAL MADE
+
+        self.events = [] # Para mostrar secuencia de eventos en el frontend
 
     def get_accuracy(self):
         if self.attempt_count == 0:
             return 0.0
         return (self.make_count / self.attempt_count) * 100
+    
+    def get_events(self):
+        return self.events
+
 
     def is_inside_net(self, point, bbox):
         x, y = point
@@ -44,7 +54,7 @@ class ShotTracker:
         self.ball_path.clear()
         self.in_net_history.clear()
 
-    def update(self, ball_info, net_info, player_positions):
+    def update(self, ball_info, net_info, player_positions, frame_idx):
         if not ball_info or not net_info:
             self.reset_shot_tracking()
             return
@@ -68,17 +78,29 @@ class ShotTracker:
 
         if self.shot_in_progress and not inside_any_net and any(self.in_net_history):
             is_make = self.is_descending()
-
             self.attempt_count += 1
+
             if player_positions and self.last_possessor_id in player_positions:
                 shooter_pos = player_positions[self.last_possessor_id]["position"]
+                event_type = "Tiro convertido" if is_make else "Tiro fallado"
+
                 if is_make:
                     self.make_count += 1
                     self.make_positions.append(shooter_pos)
                 else:
                     self.fail_positions.append(shooter_pos)
 
+                # Guardar el evento:            
+                event = {
+                    "type": event_type,
+                    "player_id": self.last_possessor_id,
+                    "position": shooter_pos,
+                    "time": frame_to_time(frame_idx, self.fps)
+                }
+                self.events.append(event)
+
             self.reset_shot_tracking()
+
 
     def draw_overlay(self, frame):
         height, width = frame.shape[:2]
@@ -152,7 +174,7 @@ class ShotTracker:
                 self.last_possessor_id = possessor_id
 
             prev_makes = self.make_count
-            self.update(ball_info, net_info, player_pos)
+            self.update(ball_info, net_info, player_pos, frame_idx)
             new_makes = self.make_count > prev_makes
 
             if new_makes:

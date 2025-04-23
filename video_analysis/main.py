@@ -1,4 +1,4 @@
-from utils import read_video, save_video, get_metadata, assign_teams
+from utils import read_video, save_video, get_metadata, assign_teams, save_events
 from trackers import Tracker
 import os
 from court_keypoint_detector import CourtKeypointDetector
@@ -7,7 +7,7 @@ from view_transformer import Transformer
 import json
 from shot_analysis import ShotTracker
 
-def process_video(input_video, output_video, court_image_path, shot_court_image_path, status_path):
+def process_video(input_video, output_video, court_image_path, shot_court_image_path, status_path, events_path):
     """
     Procesar un video de un partido de baloncesto para realizar la lógica de detecciones,
     análisis y mapeo de posiciones.
@@ -105,7 +105,7 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     print("🏀 Detectando tiros...")
     set_status("🏀 Detectando tiros...", 65)
    
-    shot_tracker = ShotTracker(shot_court_image_path)
+    shot_tracker = ShotTracker(shot_court_image_path, fps=video_metadata.fps)
 
     # =======================
     # 🎨 DIBUJAR ANOTACIONES
@@ -138,6 +138,10 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
                                                             transformer.height)
     make_flags = shot_tracker.get_make_flags()
     output_video_frames = shot_tracker.draw_scores_on_frames(output_video_frames, make_flags)
+
+    # 💾 Guardar los eventos detectados
+    events = shot_tracker.get_events() 
+    save_events(events, events_path)
 
     # =======================
     # 💾 GUARDAR VIDEOS

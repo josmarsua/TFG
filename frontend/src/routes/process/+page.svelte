@@ -17,6 +17,8 @@
 
     let progress = 0;
 
+    let events = [];
+
     onMount(() => {
         authToken.subscribe(token => {
             isAuthenticated = !!token;
@@ -83,6 +85,7 @@
                 if (processingStatus.includes("✅")) {
                     clearInterval(intervalId);
                     processedPreviewURL = tempProcessedFile; // <- MOSTRAR VIDEO
+                    await fetchEvents();
                 }
 
                 if (processingStatus.includes("❌")) {
@@ -93,6 +96,21 @@
             console.error("Error haciendo polling:", err);
         }
     }
+
+    async function fetchEvents() {
+        try {
+            const response = await fetch(`http://localhost:5000/video/events/${videoId}`);
+            if (response.ok) {
+                const data = await response.json();
+                events = data;
+            } else {
+                console.error("No se pudieron obtener los eventos.");
+            }
+        } catch (error) {
+            console.error("Error al obtener los eventos:", error);
+        }
+    }
+
 
 </script>
 
@@ -147,6 +165,28 @@
                             <source src={processedPreviewURL} type="video/mp4" />
                             Tu navegador no soporta la reproducción de videos.
                         </video>
+                        <div class="mt-8">
+                            <h2 class="text-xl font-semibold text-gray-800">Eventos del partido</h2>
+                            {#if events.length > 0}
+                                <ul class="mt-4 space-y-2">
+                                    {#each events as event}
+                                    <li class={`p-3 rounded-lg shadow-md flex items-center justify-between 
+                                        ${event.type === 'Tiro convertido' ? 'bg-green-100' : 'bg-red-100'}`}>
+                                        <div>
+                                            <span class={`font-bold ${event.type === 'Tiro convertido' ? 'text-green-700' : 'text-red-700'}`}>
+                                                {event.type}
+                                            </span>
+                                            <span class="text-gray-600 ml-2">ID del Jugador: {event.player_id}</span>
+                                            <span class="text-gray-500 ml-4 text-sm">Minuto: {event.time}</span>
+                                        </div>
+                                    </li>
+                                    {/each}
+                                </ul>
+                            {:else}
+                                <p class="text-gray-500 mt-4">No se detectaron eventos.</p>
+                            {/if}
+                        </div>
+                        
                     </div>
                 </div>
             {/if}
