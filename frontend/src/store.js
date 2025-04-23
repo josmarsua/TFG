@@ -1,12 +1,19 @@
 import { writable } from "svelte/store";
-import { browser } from "$app/environment"; // Verifica si estamos en el navegador
+import { browser } from "$app/environment"; 
 
-// Inicializar el store con un valor vacío si estamos en el servidor
 const initialToken = browser ? localStorage.getItem("token") || "" : "";
 
 export const authToken = writable(initialToken);
 
-// Solo actualizar localStorage si estamos en el navegador
+// Función global para cerrar sesión correctamente:
+export function forceLogout() {
+    authToken.set("");  // Esto ya limpia el localStorage
+    if (browser) {
+        window.location.href = "/login";  // Redirigir al login
+    }
+}
+
+// Suscripción para mantener localStorage actualizado:
 if (browser) {
     authToken.subscribe(value => {
         if (value) {

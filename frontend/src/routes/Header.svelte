@@ -76,7 +76,7 @@
                 <!-- Botón de Analizar (Solo si está autenticado) -->
                 <a href="/process"
                    class="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 px-5 rounded-full shadow transition duration-200">
-                    Analizar
+                   🪄 Analizar
                 </a>
 
 

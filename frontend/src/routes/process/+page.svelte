@@ -1,5 +1,7 @@
 <script>
     import { authToken } from "../../store.js";
+    import { forceLogout } from "../../store.js";
+
     import { onMount } from "svelte";
     import { Container, Row, Col, Button, Input } from '@sveltestrap/sveltestrap';
 
@@ -53,6 +55,11 @@
                 },
                 body: formData,
             });
+            
+            if (response.status === 401) {
+                forceLogout();  // Aquí cierras sesión y rediriges
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error("Error al procesar el archivo");
@@ -74,6 +81,10 @@
     async function pollStatus() {
         try {
             const response = await fetch(`http://localhost:5000/video/status/${videoId}`);
+            if (response.status === 401) {
+                forceLogout();  // Aquí cierras sesión y rediriges
+                return;
+            }
             if (response.ok) {
                 const data = await response.json();
                 processingStatus = data.step;
@@ -100,6 +111,10 @@
     async function fetchEvents() {
         try {
             const response = await fetch(`http://localhost:5000/video/events/${videoId}`);
+            if (response.status === 401) {
+                forceLogout();  // Aquí cierras sesión y rediriges
+                return;
+            }
             if (response.ok) {
                 const data = await response.json();
                 events = data;
@@ -144,7 +159,7 @@
                     </Col>
                     <Col class="text-center">
                         <Button class="w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl shadow-md transition-all" on:click="{uploadFile}" disabled={isLoading}>
-                            {isLoading ? "Procesando..." : "Subir"}
+                            {isLoading ? "🕗 Procesando..." : "📤 Subir"}
                         </Button>
                         <Button 
                             class="w-auto bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-xl shadow-md transition-all ml-4"

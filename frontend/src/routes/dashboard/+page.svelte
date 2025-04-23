@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { authToken } from "../../store.js";
+    import { forceLogout } from "../../store.js";
     import { Button, Card, CardBody, CardTitle, CardText, Form, FormGroup, Label, Input, Container, Row, Col } from "@sveltestrap/sveltestrap";
     import Fa from 'svelte-fa';
     import { faEye, faEyeSlash, faUser, faKey, faEnvelope, faCamera } from '@fortawesome/free-solid-svg-icons';
@@ -27,7 +28,10 @@
                 method: "GET",
                 headers: { Authorization: `Bearer ${token}` },
             });
-
+            if (response.status === 401) {
+                forceLogout();  // Aquí cierras sesión y rediriges
+                return;
+            }
             const data = await response.json();
             if (response.ok) {
                 user = data;
@@ -62,7 +66,10 @@
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData
             });
-
+            if (response.status === 401) {
+                forceLogout();  // Aquí cierras sesión y rediriges
+                return;
+            }
             const data = await response.json();
             if (response.ok) {
                 successMessage = data.message;
