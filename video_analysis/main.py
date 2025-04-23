@@ -6,12 +6,14 @@ from ball_possession import BallPossession
 from view_transformer import Transformer
 import json
 from events import ShotTracker, PassDetector
+import time
 
 def process_video(input_video, output_video, court_image_path, shot_court_image_path, status_path, events_path):
     """
     Procesar un video de un partido de baloncesto para realizar la lógica de detecciones,
     análisis y mapeo de posiciones.
     """
+    start_time = time.time()
     def set_status(msg, progress=None):
         status = {"step": msg}
         if progress is not None:
@@ -156,4 +158,7 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
 
     # Guardar el video 
     save_video(output_video_frames, output_video, fps=video_metadata.fps)
-    set_status("✅ Video procesado", 100)
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    set_status(f"✅ Video procesado. Tiempo total: {int(elapsed_time // 60)} minutos, {int(elapsed_time % 60)} segundos", 100)
