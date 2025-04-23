@@ -171,13 +171,25 @@
                                 <ul class="mt-4 space-y-2">
                                     {#each events as event}
                                     <li class={`p-3 rounded-lg shadow-md flex items-center justify-between 
-                                        ${event.type === 'Tiro convertido' ? 'bg-green-100' : 'bg-red-100'}`}>
+                                        ${event.type === 'Tiro convertido' ? 'bg-green-100' 
+                                        : event.type === 'Tiro fallado' ? 'bg-red-100' 
+                                        : 'bg-blue-100'}`}>
                                         <div>
-                                            <span class={`font-bold ${event.type === 'Tiro convertido' ? 'text-green-700' : 'text-red-700'}`}>
-                                                {event.type}
-                                            </span>
-                                            <span class="text-gray-600 ml-2">ID del Jugador: {event.player_id}</span>
-                                            <span class="text-gray-500 ml-4 text-sm">Minuto: {event.time}</span>
+                                            {#if event.type === 'Tiro convertido' || event.type === 'Tiro fallado'}
+                                                <span class={`font-bold 
+                                                    ${event.type === 'Tiro convertido' ? 'text-green-700' 
+                                                    : 'text-red-700'}`}>
+                                                    {event.type}
+                                                </span>
+                                                <span class="text-gray-600 ml-2">ID del Jugador: {event.player_id}</span>
+                                                <span class="text-gray-500 ml-4 text-sm">Minuto: {event.time}</span>
+                                            {:else if event.type === 'Pase'}
+                                                <span class="font-bold text-yellow-700">{event.type}</span>
+                                                <span class="text-gray-600 ml-2">
+                                                    De Jugador ID: {event.from_player_id} a Jugador ID: {event.to_player_id}
+                                                </span>
+                                                <span class="text-gray-500 ml-4 text-sm">Minuto: {event.time}</span>
+                                            {/if}
                                         </div>
                                     </li>
                                     {/each}

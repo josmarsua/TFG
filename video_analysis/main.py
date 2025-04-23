@@ -5,7 +5,7 @@ from court_keypoint_detector import CourtKeypointDetector
 from ball_possession import BallPossession
 from view_transformer import Transformer
 import json
-from shot_analysis import ShotTracker
+from events import ShotTracker, PassDetector
 
 def process_video(input_video, output_video, court_image_path, shot_court_image_path, status_path, events_path):
     """
@@ -99,13 +99,15 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
 
 
     # =======================
-    # 9️⃣ DETECTAR TIROS
+    # 9️⃣ DETECTAR TIROS Y PASES
     # =======================
 
-    print("🏀 Detectando tiros...")
-    set_status("🏀 Detectando tiros...", 65)
+    print("🏀 Detectando tiros y pases...")
+    set_status("🏀 Detectando tiros y pases...", 65)
    
     shot_tracker = ShotTracker(shot_court_image_path, fps=video_metadata.fps)
+    pass_detector = PassDetector(video_metadata.fps)
+    pass_detector.detect_passes(ball_possession, player_assignment)
 
     # =======================
     # 🎨 DIBUJAR ANOTACIONES
@@ -139,9 +141,7 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     make_flags = shot_tracker.get_make_flags()
     output_video_frames = shot_tracker.draw_scores_on_frames(output_video_frames, make_flags)
 
-    # 💾 Guardar los eventos detectados
-    events = shot_tracker.get_events() 
-    save_events(events, events_path)
+
 
     # =======================
     # 💾 GUARDAR VIDEOS
@@ -149,6 +149,10 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     print("💾 Guardando video...")
     set_status("💾 Guardando video...", 85)
     
+    # 💾 Guardar los eventos detectados
+    events = shot_tracker.get_events() + pass_detector.get_events()
+    save_events(events, events_path)
+
     # Guardar el video 
     save_video(output_video_frames, output_video, fps=video_metadata.fps)
     set_status("✅ Video procesado", 100)
