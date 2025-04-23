@@ -37,7 +37,7 @@
                 <li><strong>🧠 Detección de objetos:</strong> jugadores, árbitros, balón y canasta usando modelos YOLO.</li>
                 <li><strong>👕 Asignación de equipos:</strong> mediante clustering automático por colores.</li>
                 <li><strong>⏱️ Estadísticas de posesión:</strong> seguimiento por frame de quién controla el balón.</li>
-                <li><strong>🏀 Detección de canastas:</strong> muestra un cartel cada vez que se detecta un tiro convertido.</li>
+                <li><strong>🏀 Eventos:</strong> tiros fallados y convertidos por equipo y pases.</li>
                 <li><strong>📐 Homografía:</strong> transforma coordenadas a una vista cenital (2D del campo).</li>
                 <li><strong>🎨 Renderizado visual:</strong> el video final incluye anotaciones superpuestas en tiempo real.</li>
             </ul>
