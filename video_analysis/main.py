@@ -130,7 +130,8 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     
     output_video_frames = ball_possession_detector.draw_possession(output_video_frames,
                                                                    player_assignment,
-                                                                   ball_possession)
+                                                                   ball_possession,
+                                                                   tracks["players"])
 
     output_video_frames = shot_tracker.draw_minimap_overlay(output_video_frames,
                                                             court_player_positions,

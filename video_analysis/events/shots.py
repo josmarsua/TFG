@@ -15,6 +15,11 @@ class ShotTracker:
         self.make_positions = []
         self.fail_positions = []
 
+        self.team_stats = {
+            1: {"makes": 0, "attempts": 0},
+            2: {"makes": 0, "attempts": 0}
+        }
+
         self.court_pic_path = court_pic_path
         self.width = 300
         self.height = 161
@@ -84,6 +89,12 @@ class ShotTracker:
                 shooter_pos = player_positions[self.last_possessor_id]["position"]
                 event_type = "Tiro convertido" if is_make else "Tiro fallado"
 
+                team = player_positions[self.last_possessor_id].get("team", -1)
+                if team in (1, 2):
+                    self.team_stats[team]["attempts"] += 1
+                    if is_make:
+                        self.team_stats[team]["makes"] += 1
+
                 if is_make:
                     self.make_count += 1
                     self.make_positions.append(shooter_pos)
@@ -109,28 +120,28 @@ class ShotTracker:
         font_scale = sv.calculate_optimal_text_scale((width, height))
         thickness = int(sv.calculate_optimal_line_thickness((width, height)))
 
-        anchor = sv.Point(
-            x=int(width * 0.50),
-            y=int(height * 0.05)
-        )
+        anchor_team1 = sv.Point(x=int(width * 0.50), y=int(height * 0.05))
+        anchor_team2 = sv.Point(x=int(width * 0.50), y=int(height * 0.11))
 
-        lines = [
-            f"Makes: {self.make_count}, Attempts: {self.attempt_count}, Accuracy: {self.get_accuracy():.2f}%"
-        ]
+        for team, anchor in zip([1, 2], [anchor_team1, anchor_team2]):
+            makes = self.team_stats[team]["makes"]
+            attempts = self.team_stats[team]["attempts"]
+            accuracy = (makes / attempts) * 100 if attempts > 0 else 0
 
-        for i, line in enumerate(lines):
-            y_pos = anchor.y + int(i * 50 * scale_y)
-            anchor_line = sv.Point(x=anchor.x, y=y_pos)
+            line = f"Team {team} -> Makes: {makes}, Attempts: {attempts}, Accuracy: {accuracy:.2f}%"
+
             frame = sv.draw_text(
                 scene=frame,
                 text=line,
-                text_anchor=anchor_line,
+                text_anchor=anchor,
                 text_color=sv.Color.BLACK,
                 background_color=sv.Color.WHITE,
                 text_scale=font_scale,
                 text_thickness=thickness
             )
+
         return frame
+
 
     def draw_on_minimap(self, frame, x1, y1):
         court_image = cv2.imread(self.court_pic_path)

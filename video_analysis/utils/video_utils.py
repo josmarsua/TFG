@@ -89,5 +89,5 @@ def frame_to_time(frame_idx, fps):
     total_seconds = frame_idx / fps
     minutes = int(total_seconds // 60)
     seconds = int(total_seconds % 60)
-    
+
     return f"{minutes}:{seconds:02d}"

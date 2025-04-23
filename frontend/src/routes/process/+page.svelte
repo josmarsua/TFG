@@ -122,7 +122,7 @@
         <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
             <header class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-gray-800">Sube un vídeo</h1>
-                <p class="text-lg text-gray-600">Selecciona un video para analizar.</p>
+                <p class="text-lg text-gray-600">Selecciona un vídeo para analizar.</p>
             </header>
             <Container>
                 <Row>
@@ -184,7 +184,7 @@
                                                 <span class="text-gray-600 ml-2">ID del Jugador: {event.player_id}</span>
                                                 <span class="text-gray-500 ml-4 text-sm">Minuto: {event.time}</span>
                                             {:else if event.type === 'Pase'}
-                                                <span class="font-bold text-yellow-700">{event.type}</span>
+                                                <span class="font-bold text-blue-700">{event.type}</span>
                                                 <span class="text-gray-600 ml-2">
                                                     De Jugador ID: {event.from_player_id} a Jugador ID: {event.to_player_id}
                                                 </span>

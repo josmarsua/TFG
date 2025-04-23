@@ -143,7 +143,8 @@ class Transformer:
                     team_color = frame_tracks[player_id].get("team_color", [0,0,0])
                     court_positions[player_id] = {
                         "position": court_position[0].tolist(),
-                        "team_color": team_color
+                        "team_color": team_color,
+                        "team": frame_tracks[player_id].get("team", -1)
                     }
 
             except (ValueError, cv2.error) as e:

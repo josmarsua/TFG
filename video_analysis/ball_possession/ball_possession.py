@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../')
-from utils.bbox_utils import measure_distance, get_center_of_bbox, get_key_points
+from utils import measure_distance, get_center_of_bbox, get_key_points
 import cv2 
 import numpy as np
 import supervision as sv
@@ -102,17 +102,23 @@ class BallPossession:
                 team_control.append(team if team in (1, 2) else -1)
         return np.array(team_control)
 
-    def draw_possession(self, video_frames, player_assignment, ball_possession):
+    def draw_possession(self, video_frames, player_assignment, ball_possession, player_tracks):
         team_ball_control = self.get_team_ball_control(player_assignment, ball_possession)
         output_video_frames = []
         for frame_num, frame in enumerate(video_frames):
             if frame_num == 0:
                 continue
-            frame_drawn = self.draw_frame(frame, frame_num, team_ball_control)
+            frame_drawn = self.draw_frame(
+                frame, 
+                frame_num, 
+                team_ball_control, 
+                player_assignment[frame_num], 
+                player_tracks[frame_num]
+            )
             output_video_frames.append(frame_drawn)
         return output_video_frames
 
-    def draw_frame(self, frame, frame_num, team_ball_control):
+    def draw_frame(self, frame, frame_num, team_ball_control, player_assignment_frame, player_tracks_frame):
         frame_height, frame_width = frame.shape[:2]
 
         team_control_till_frame = team_ball_control[:frame_num + 1]
@@ -122,27 +128,46 @@ class BallPossession:
         team1_percent = (controlled == 1).sum() / total_controlled if total_controlled > 0 else 0
         team2_percent = (controlled == 2).sum() / total_controlled if total_controlled > 0 else 0
 
+        # Obtener colores correctos desde player_tracks_frame
+        team_colors = {1: (0, 0, 0), 2: (0, 0, 0)}  # Default negro si no se encuentra
+        for player_id, team in player_assignment_frame.items():
+            if team in (1, 2):
+                color = player_tracks_frame.get(player_id, {}).get("team_color", [0, 0, 0])
+                team_colors[team] = tuple(map(int, color))
+
+        font_scale = sv.calculate_optimal_text_scale((frame_width, frame_height))
+        thickness = sv.calculate_optimal_line_thickness((frame_width, frame_height))
+        font = cv2.FONT_HERSHEY_SIMPLEX
+
         lines = [
             "Ball Possession",
             f"Team 1: {team1_percent * 100:.2f}%",
             f"Team 2: {team2_percent * 100:.2f}%"
         ]
 
-        font_scale = sv.calculate_optimal_text_scale((frame_width, frame_height))
-        thickness = sv.calculate_optimal_line_thickness((frame_width, frame_height))
-        font = cv2.FONT_HERSHEY_SIMPLEX
         line_heights = [cv2.getTextSize(line, font, font_scale, thickness)[0][1] + 12 for line in lines]
 
-        base_x = int(frame_width * 0.90)  # 80% del ancho
-        base_y = int(frame_height * 0.05) # 5% del alto
+        base_x = int(frame_width * 0.90)
+        base_y = int(frame_height * 0.05)
         current_y = base_y
+
         for i, line in enumerate(lines):
             anchor = sv.Point(x=base_x, y=current_y)
+
+            if "Team 1" in line:
+                bgr = team_colors[1]
+                text_color = sv.Color(r=bgr[2], g=bgr[1], b=bgr[0])
+            elif "Team 2" in line:
+                bgr = team_colors[2]
+                text_color = sv.Color(r=bgr[2], g=bgr[1], b=bgr[0])
+            else:
+                text_color = sv.Color.BLACK
+
             frame = sv.draw_text(
                 scene=frame,
                 text=line,
                 text_anchor=anchor,
-                text_color=sv.Color.BLACK,
+                text_color=text_color,
                 background_color=sv.Color.WHITE,
                 text_scale=font_scale,
                 text_thickness=thickness
