@@ -1,2 +1,2 @@
-from .shots import ShotTracker
+from .shots import ShotDetector
 from .passes import PassDetector

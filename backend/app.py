@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 # =======================
-# CONFIGURACIÓN GENERAL
+# CONFIGURACION GENERAL
 # =======================
 app.config['UPLOAD_FOLDER'] = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads'))
 app.config['PROCESSED_FOLDER'] = os.path.abspath(os.path.join(os.path.dirname(__file__), 'processed'))

@@ -5,7 +5,7 @@ from utils import get_center_of_bbox
 import supervision as sv
 from utils import frame_to_time
 
-class ShotTracker:
+class ShotDetector:
     def __init__(self, court_pic_path, fps):
 
         self.fps = fps

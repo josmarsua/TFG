@@ -43,16 +43,6 @@
             </ul>
         </section>
 
-         <section class="video-demo mb-12 text-center">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎥 Vídeo Demo</h2>
-            <!--
-            <video class="rounded-lg shadow-lg mx-auto" width="720" height="420" controls>
-                <source src="/demo.mp4" type="video/mp4" />
-                Tu navegador no soporta la reproducción de video.
-            </video>
-            -->
-        </section>
-
         <section class="resources text-center mb-12">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">📚 Recursos del Proyecto</h2>
             <div class="flex flex-col md:flex-row justify-center items-center gap-6">
@@ -65,6 +55,16 @@
                     Ver Memoria del Proyecto 📄
                 </a>
             </div>
+        </section>
+
+        <section class="video-demo mb-12 text-center">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎥 Vídeo Demo</h2>
+            <!--
+            <video class="rounded-lg shadow-lg mx-auto" width="720" height="420" controls>
+                <source src="/demo.mp4" type="video/mp4" />
+                Tu navegador no soporta la reproducción de video.
+            </video>
+            -->
         </section>
 
         <section class="cta text-center mt-12">
