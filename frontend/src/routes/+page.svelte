@@ -17,16 +17,16 @@
 <main>
     <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">        
         <header class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-blue-900">🏀 BasketVision</h1>
+            <h1 class="text-4xl font-bold text-blue-900">🏀 Basketlytics</h1>
             <p class="text-lg mt-2 text-gray-600">
                 Análisis inteligente de partidos de baloncesto en vídeo.
             </p>
         </header>
 
         <section class="intro text-center mb-12">
-            <h2 class="text-2xl font-semibold text-gray-800">¿Qué es BasketVision?</h2>
+            <h2 class="text-2xl font-semibold text-gray-800">¿Qué es Basketlytics?</h2>
             <p class="mt-4 text-gray-600 max-w-3xl mx-auto">
-                BasketVision es una plataforma web que permite analizar partidos de baloncesto de forma automática a partir de un vídeo. Detecta jugadores, árbitros, balón, canastas, asigna equipos, calcula estadísticas de posesión, convierte coordenadas reales a una vista táctica, y genera un video final con todas las anotaciones visuales.
+                Basketlytics es una plataforma web que permite analizar partidos de baloncesto de forma automática a partir de un vídeo. Detecta jugadores, árbitros, balón, canastas, asigna equipos, calcula estadísticas de posesión, convierte coordenadas reales a una vista táctica, y genera un video final con todas las anotaciones visuales.
             </p>
         </section>
 

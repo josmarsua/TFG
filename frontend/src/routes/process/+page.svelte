@@ -4,6 +4,7 @@
 
     import { onMount } from "svelte";
     import { Container, Row, Col, Button, Input } from '@sveltestrap/sveltestrap';
+    import { API_BASE_URL } from '../../config.js';
 
     let file = null;
     let videoprocessed = false;
@@ -48,7 +49,7 @@
         try {
             const token = localStorage.getItem("token");
 
-            const response = await fetch('http://localhost:5000/video/upload', {
+            const response = await fetch(`${API_BASE_URL}/video/upload`, {
                 method: 'POST',
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -67,7 +68,7 @@
 
             const data = await response.json();
             videoId = data.video_id;
-            tempProcessedFile = `http://localhost:5000${data.processed_file}`; 
+            tempProcessedFile = `${API_BASE_URL}${data.processed_file}`; 
             processingStatus = "🚀 Comenzando procesamiento...";
 
             intervalId = setInterval(pollStatus, 1000); // Poll every second
@@ -80,7 +81,7 @@
 
     async function pollStatus() {
         try {
-            const response = await fetch(`http://localhost:5000/video/status/${videoId}`);
+            const response = await fetch(`${API_BASE_URL}/video/status/${videoId}`);
             if (response.status === 401) {
                 forceLogout();  // Aquí cierras sesión y rediriges
                 return;
@@ -112,7 +113,7 @@
 
     async function fetchEvents() {
         try {
-            const response = await fetch(`http://localhost:5000/video/events/${videoId}`);
+            const response = await fetch(`${API_BASE_URL}/video/events/${videoId}`);
             if (response.status === 401) {
                 forceLogout();  // Aquí cierras sesión y rediriges
                 return;
@@ -132,7 +133,7 @@
         const token = localStorage.getItem("token");
 
         try {
-            const response = await fetch(`http://localhost:5000/video/processed/${videoId}/${filename}`, {
+            const response = await fetch(`${API_BASE_URL}/video/processed/${videoId}/${filename}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }

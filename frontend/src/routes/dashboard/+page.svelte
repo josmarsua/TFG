@@ -5,6 +5,7 @@
     import { Button, Card, CardBody, CardTitle, CardText, Form, FormGroup, Label, Input, Container, Row, Col } from "@sveltestrap/sveltestrap";
     import Fa from 'svelte-fa';
     import { faEye, faEyeSlash, faUser, faKey, faEnvelope, faCamera } from '@fortawesome/free-solid-svg-icons';
+    import { API_BASE_URL } from '../../config.js';
 
     let user = { username: "", 
                     email: "", 
@@ -24,7 +25,7 @@
                 return;
             }
 
-            const response = await fetch("http://127.0.0.1:5000/auth/profile", {
+            const response = await fetch(`${API_BASE_URL}/auth/profile`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -61,7 +62,7 @@
 
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://127.0.0.1:5000/auth/update-profile", {
+            const response = await fetch(`${API_BASE_URL}/auth/update-profile`, {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData
@@ -106,7 +107,7 @@
                         <div class="alert alert-danger">{errorMessage}</div>
                         {/if}
                         <div class="flex align-items-center flex-column">
-                            <img src={`http://127.0.0.1:5000/uploads/${user.profile_picture}`} alt="Foto de perfil" class="rounded-circle border border-gray-300 shadow-sm" width="100">                            
+                            <img src={`${API_BASE_URL}/uploads/${user.profile_picture}`} alt="Foto de perfil" class="rounded-circle border border-gray-300 shadow-sm" width="100">                            
                             <h2 class="fw-bold text-center">{user.username}</h2>
                         </div>
                         

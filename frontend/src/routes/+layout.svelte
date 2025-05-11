@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-    <title>BasketVision</title>
+    <title>Basketlytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </svelte:head>
 <div class="bg-[#D9EFFF] min-h-screen flex flex-col">

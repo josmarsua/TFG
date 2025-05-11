@@ -3,6 +3,7 @@
     import { Input, Button, Form, FormGroup, Label, Alert, Container, Row, Col } from '@sveltestrap/sveltestrap';
     import Fa from 'svelte-fa';
     import { faEye, faEyeSlash, faUser, faKey } from '@fortawesome/free-solid-svg-icons';
+    import { API_BASE_URL } from '../../config.js';
 
     let username = "";
     let password = "";
@@ -28,7 +29,7 @@
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/auth/login", {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
