@@ -3,9 +3,10 @@
     import { onMount, onDestroy } from "svelte";
     import Fa from 'svelte-fa';
     import { faPowerOff } from '@fortawesome/free-solid-svg-icons';
+    import { API_BASE_URL } from '../config.js';
 
     let isAuthenticated = false;
-    let profilePicture = "http://127.0.0.1:5000/uploads/default_profile.webp"; // Imagen por defecto
+    let profilePicture = `${API_BASE_URL}/uploads/default_profile.webp`; // Imagen por defecto
     let unsubscribe; // Para manejar la suscripción y evitar múltiples llamadas
 
     // Verificar si el usuario está autenticado y obtener su imagen de perfil
@@ -21,7 +22,7 @@
             isAuthenticated = !!token;
             if (isAuthenticated) {
                 try {
-                    const response = await fetch("http://127.0.0.1:5000/auth/profile", {
+                    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
                         method: "GET",
                         headers: { "Authorization": `Bearer ${token}` },
                     });
@@ -30,7 +31,7 @@
 
                     const data = await response.json();
                     if (data.profile_picture) {
-                        profilePicture = `http://127.0.0.1:5000/uploads/${data.profile_picture}`;
+                        profilePicture = `${API_BASE_URL}/uploads/${data.profile_picture}`;
                     } else {
                         profilePicture = "/default_profile.webp";
                     }

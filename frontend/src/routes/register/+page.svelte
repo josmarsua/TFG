@@ -2,6 +2,7 @@
     import { Input, Button, Form, FormGroup, Label, Alert } from '@sveltestrap/sveltestrap';
     import Fa from 'svelte-fa';
     import { faEye, faEyeSlash, faUser, faKey, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+    import { API_BASE_URL } from '../../config.js';
 
     let username = "";
     let email = "";
@@ -31,7 +32,7 @@
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:5000/auth/register", {
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, email, password })
