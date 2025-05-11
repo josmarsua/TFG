@@ -66,7 +66,7 @@
         <!-- Logo / Título -->
         <a href="/" class="flex items-center space-x-3">
             <img src="/logo.png" class="w-10 h-10" alt="Logo" />
-            <span class="text-2xl font-semibold tracking-tight">Basket<span class="text-cyan-300">Vision</span></span>
+            <span class="text-2xl font-semibold tracking-tight">Basket<span class="text-cyan-300">lytics</span></span>
         </a>
           
 
