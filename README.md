@@ -4,19 +4,6 @@
 
 ---
 
-## 🌐 ¿Qué es Basketlytics?
-
-Basketlytics permite subir un vídeo de un partido y obtener como resultado un nuevo vídeo procesado que incluye:
-
-- Detección de jugadores, balón, árbitros y canastas mediante modelos YOLO.
-- Cálculo de posesión del balón y seguimiento por equipo.
-- Asignación automática de equipos por colores.
-- Detección de eventos como tiros convertidos, fallados y pases.
-- Transformación de coordenadas a una vista cenital del campo.
-- Renderizado final con anotaciones visuales superpuestas.
-
----
-
 ## 🚀 Funcionalidades
 
 - 📹 **Subida de vídeo** desde el navegador
@@ -57,6 +44,7 @@ python backend/app.py
 cd frontend
 npm install
 npm run dev
+```
 
 ## 🐳 Despliegue con Docker
 
@@ -65,13 +53,13 @@ npm run dev
 ```bash
 git checkout main
 docker compose up --build -d
-
+```
 ### Opción B: Despliegue en AWS (solo CPU) – Rama `aws`
 
 ```bash
 git checkout aws
 docker compose up --build -d
-
+```
 ## 📚 Recursos del proyecto
 
 - 📁 **Repositorio**: [https://github.com/josmarsua/TFG](https://github.com/josmarsua/TFG)
