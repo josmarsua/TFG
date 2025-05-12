@@ -62,7 +62,7 @@ docker compose up --build -d
 ```
 ## 📚 Recursos del proyecto
 
-- 📦 **Modelos preentrenados**: [https://drive.google.com/drive/folders/1znXEIR6sPuR8oprElCuK32V6d7o2L1AJ?usp=sharing](Enlace a Drive). Estos modelos deben incluirse en ```video_analysis/models```
+- 📦 **Modelos preentrenados**: [https://drive.google.com/drive/folders/1znXEIR6sPuR8oprElCuK32V6d7o2L1AJ?usp=sharing] Estos modelos deben incluirse en ```video_analysis/models```
 - 📁 **Repositorio**: [https://github.com/josmarsua/TFG](https://github.com/josmarsua/TFG)
 - 📄 **Memoria del proyecto**: *(enlace por definir)*
 - 🎥 **Vídeo demo**: *(por añadir)*
