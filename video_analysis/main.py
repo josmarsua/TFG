@@ -50,7 +50,7 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
 
     court_keypoint_detector = CourtKeypointDetector(keypoint_model_path)
     court_keypoint_detector_perframe = court_keypoint_detector.get_court_keypoints(video_frames, 
-                                                                                   read_from_stub=True,
+                                                                                   read_from_stub=False,
                                                                                    stub_path=stub_path_kp)
    
     
@@ -63,7 +63,7 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     set_status("🏃‍♂️ Detectando y trackeando objetos...", 20)
     tracker = Tracker(tracker_model_path)
     tracks = tracker.get_object_tracks(video_frames, 
-                                       read_from_stub=True, 
+                                       read_from_stub=False, 
                                        stub_path=stub_path)
 
     # =======================

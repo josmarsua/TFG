@@ -5,12 +5,14 @@ import pickle
 import os
 import cv2
 import numpy as np
+import torch
 sys.path.append('../')
 
 
 class CourtKeypointDetector:
     def __init__(self, model_path):
-        self.model = YOLO(model_path)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = YOLO(model_path).to(self.device)
     
     def get_court_keypoints(self, frames,read_from_stub=False, stub_path=None):
 
@@ -22,7 +24,7 @@ class CourtKeypointDetector:
         batch_size=20
         court_keypoints = []
         for i in range(0,len(frames),batch_size):
-            detections_batch = self.model.predict(frames[i:i+batch_size],conf=0.5)
+            detections_batch = self.model.predict(frames[i:i+batch_size], conf=0.5, device=self.device)
             for detection in detections_batch:
                 court_keypoints.append(detection.keypoints)
  

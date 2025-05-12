@@ -3,10 +3,13 @@ import supervision as sv
 import pickle
 import os
 import numpy as np
+import torch
 
 class Tracker:
     def __init__(self, model_path):
-        self.model = YOLO(model_path)
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = YOLO(model_path).to(device)
+        self.device = device
         self.tracker = sv.ByteTrack()
         self.smoother = sv.DetectionsSmoother(length=5)
 
@@ -14,7 +17,7 @@ class Tracker:
         batch_size = 20
         detections = []
         for i in range(0, len(frames), batch_size):
-            detections_batch = self.model.predict(frames[i:i + batch_size], conf=0.5)
+            detections_batch = self.model.predict(frames[i:i + batch_size], conf=0.5, device=self.device)
             detections += detections_batch
         return detections
 
