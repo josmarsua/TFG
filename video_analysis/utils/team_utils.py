@@ -3,7 +3,7 @@ from team_assigner import TeamAssigner
 def assign_teams(video_frames, tracks):
     """ Asigna equipos a los jugadores usando KMeans clustering. """
     team_assigner = TeamAssigner()
-    for i in range(min(len(video_frames), 50)):  # Analizar los primeros 50 frames
+    for i in range(min(len(video_frames), 200)):  # Analizar los primeros 200 frames
         team_assigner.assign_team_color(video_frames[i], tracks['players'][i])
 
     for frame_num, player_track in enumerate(tracks['players']):

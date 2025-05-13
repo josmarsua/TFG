@@ -14,25 +14,29 @@ class TeamAssigner:
             return None
 
         h, w, _ = cropped.shape
-        crop_size = min(h, w) // 3
-        cx, cy = w // 2, h // 2
-        start_x, end_x = max(cx - crop_size // 2, 0), min(cx + crop_size // 2, w)
-        start_y, end_y = max(cy - crop_size // 2, 0), min(cy + crop_size // 2, h)
-        center_crop = cropped[start_y:end_y, start_x:end_x]
 
-        if center_crop.size == 0:
+        # Seleccionar una región amplia y representativa del cuerpo (parte superior-central)
+        start_y, end_y = 0, int(h * 0.6)  
+        start_x, end_x = int(w * 0.2), int(w * 0.8)  
+        region = cropped[start_y:end_y, start_x:end_x]
+
+        if region is None or region.size == 0:
             return None
 
-        image_2d = center_crop.reshape(-1, 3)
+        # Aplanar a una lista de píxeles
+        image_2d = region.reshape(-1, 3)
         image_2d = np.unique(image_2d, axis=0)
+
         if len(image_2d) < 2:
             return None
 
+        # Aplicar KMeans para encontrar el color dominante
         kmeans = KMeans(n_clusters=min(3, len(image_2d)), random_state=42).fit(image_2d)
         labels, counts = np.unique(kmeans.labels_, return_counts=True)
         dominant_cluster = labels[np.argmax(counts)]
 
         return kmeans.cluster_centers_[dominant_cluster]
+
 
     def assign_team_color(self, frame, player_detections):
         player_colors = []
