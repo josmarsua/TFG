@@ -91,3 +91,26 @@ def frame_to_time(frame_idx, fps):
     seconds = int(total_seconds % 60)
 
     return f"{minutes}:{seconds:02d}"
+
+import cv2
+
+def save_video2(output_video_frames, output_video_path, fps=24):
+    """
+    Guarda un video usando OpenCV (cv2.VideoWriter), escribiendo frame por frame sin cargar todo en memoria.
+    Ideal para reducir consumo de RAM.
+    """
+    if not output_video_frames:
+        raise ValueError("No hay cuadros para guardar.")
+
+    height, width = output_video_frames[0].shape[:2]
+    print(f"💾 Guardando video: {width}x{height} a {fps} FPS (OpenCV)...")
+
+    # Define el códec y crea el objeto VideoWriter
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # usa 'XVID' o 'avc1' si 'mp4v' da problemas
+    writer = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
+
+    for frame in output_video_frames:
+        writer.write(frame)  # BGR, no hace falta convertir
+
+    writer.release()
+    print(f"✅ Video guardado con éxito: {output_video_path}")

@@ -59,12 +59,13 @@
 
         <section class="video-demo mb-12 text-center">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎥 Vídeo Demo</h2>
-            <!--
+            
+            <!-- svelte-ignore a11y_media_has_caption -->
             <video class="rounded-lg shadow-lg mx-auto" width="720" height="420" controls>
-                <source src="/demo.mp4" type="video/mp4" />
+                <source src="/democorto.mp4" type="video/mp4" />
                 Tu navegador no soporta la reproducción de video.
             </video>
-            -->
+            
         </section>
 
         <section class="cta text-center mt-12">

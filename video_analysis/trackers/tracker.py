@@ -91,7 +91,7 @@ class Tracker:
         
         output_frames = []
         for frame_idx, frame in enumerate(frames):
-            frame = frame.copy()
+            #frame = frame.copy()
 
             # Jugadores
             players = tracks["players"][frame_idx]

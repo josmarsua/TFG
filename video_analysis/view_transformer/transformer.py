@@ -164,7 +164,7 @@ class Transformer:
 
         output_video_frames = []
         for frame_idx, frame in enumerate(video_frames):
-            frame = frame.copy()
+            #frame = frame.copy()
 
             # Posición en la que dibujamos el overlay
             frame_height, frame_width = frame.shape[:2]
@@ -178,7 +178,7 @@ class Transformer:
             y1 = y2 - height
             
             alpha = 0.8  # Transparencia
-            overlay = frame[y1:y2, x1:x2].copy()
+            overlay = frame[y1:y2, x1:x2]
             cv2.addWeighted(court_image, alpha, overlay, 1 - alpha, 0, frame[y1:y2, x1:x2])
             
             # Dibujar keypoints de la cancha táctica

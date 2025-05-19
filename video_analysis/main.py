@@ -1,4 +1,4 @@
-from utils import read_video, save_video, get_metadata, assign_teams, save_events
+from utils import read_video, save_video, get_metadata, assign_teams, save_events, save_video2
 from trackers import Tracker
 import os
 from court_keypoint_detector import CourtKeypointDetector
@@ -7,6 +7,7 @@ from view_transformer import Transformer
 import json
 from events import ShotDetector, PassDetector
 import time
+import gc
 
 def process_video(input_video, output_video, court_image_path, shot_court_image_path, status_path, events_path):
     """
@@ -46,7 +47,7 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     print("🏀 Detectando puntos clave de la cancha...")
     set_status("🏀 Detectando puntos clave de la cancha...", 10)
     keypoint_model_path = os.path.join(base_dir, 'models', 'keypoint.pt')
-    stub_path_kp = os.path.join(base_dir, 'stubs', 'track_stubskpnuevo5.pkl')
+    stub_path_kp = os.path.join(base_dir, 'stubs', 'kpunicaja.pkl')
 
     court_keypoint_detector = CourtKeypointDetector(keypoint_model_path)
     court_keypoint_detector_perframe = court_keypoint_detector.get_court_keypoints(video_frames, 
@@ -58,7 +59,7 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     # 4️⃣ DETECCIÓN Y SEGUIMIENTO DE OBJETOS
     # =======================    
     tracker_model_path = os.path.join(base_dir, 'models', 'aisportsv2.pt')
-    stub_path = os.path.join(base_dir, 'stubs', 'track_stubsshortnuevo5.pkl')
+    stub_path = os.path.join(base_dir, 'stubs', 'unicaja.pkl')
     print("🏃‍♂️ Detectando y trackeando objetos...")
     set_status("🏃‍♂️ Detectando y trackeando objetos...", 20)
     tracker = Tracker(tracker_model_path)
@@ -118,6 +119,8 @@ def process_video(input_video, output_video, court_image_path, shot_court_image_
     set_status("🎨 Dibujando anotaciones...", 70)
 
     output_video_frames = tracker.draw_annotations(video_frames, tracks, ball_possession)
+    del video_frames 
+    gc.collect()
     set_status("🎨 Dibujando anotaciones...", 75)
     output_video_frames = court_keypoint_detector.draw_court_keypoints(output_video_frames, court_keypoint_detector_perframe)
     set_status("🎨 Dibujando anotaciones...", 80)
