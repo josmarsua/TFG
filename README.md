@@ -4,7 +4,8 @@
 
 Tactical and statistical analysis in professional basketball typically relies on proprietary tools and manual processes, which limit accessibility in amateur or semi-professional contexts. This project presents a fully automated solution for basketball game analysis based solely on video input, requiring no specialized sensors or equipment. The implemented system leverages computer vision and deep learning techniques to detect and track players, the ball, and referees; automatically assigns teams through color-based clustering; and projects spatial positions onto a virtual top-down court view using homography. Furthermore, it infers ball possession, detects key events such as shots and passes, and generates dynamic visualizations that are rendered within an interactive web application accessible via browser.
 
-Keywords: computer vision, basketball, deep learning, sports analytics, action detection.
+**Keywords**: computer vision, basketball, deep learning, YOLO, sports analytics, action detection.
+
 ---
 
 ## 🚀 Funcionalidades
