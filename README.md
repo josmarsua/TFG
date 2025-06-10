@@ -66,8 +66,7 @@ docker compose up --build -d
 - 📁 **Repositorio**: [https://github.com/josmarsua/TFG](https://github.com/josmarsua/TFG)
 - 📄 **Memoria del proyecto**: *(enlace por definir)*
 - 🎥 **Vídeo demo**:
-![capturademo](https://www.youtube.com/watch?v=n4v1BjWUU1c&ab_channel=Jos%C3%A9Mart%C3%ADnezSu%C3%A1rez)
-
+[![capturademo](https://github.com/user-attachments/assets/5007a073-8e90-4fcd-be6e-08c31bec096f)](https://www.youtube.com/watch?v=n4v1BjWUU1c&ab_channel=Jos%C3%A9Mart%C3%ADnezSu%C3%A1rez)
 
 
 
