@@ -7,11 +7,11 @@
 ## 🚀 Funcionalidades
 
 - 📹 **Subida de vídeo** desde el navegador
-- 🧠 **Detección de objetos** con modelos de aprendizaje profundo
-- 👕 **Asignación automática de equipos**
+- 🧠 **Detección de objetos** con modelos de aprendizaje profundo (YOLO)
+- 👕 **Asignación automática de equipos** mediante clustering K-Means
 - ⏱️ **Estadísticas avanzadas de posesión**
 - 🏀 **Detección de eventos clave (tiros, pases)**
-- 📐 **Homografía y proyección a vista táctica**
+- 📐 **Homografía y proyección a vista táctica** utilizando homografía y transformación de perspectiva
 - 🎨 **Generación de vídeo final anotado**
 
 ---
@@ -65,7 +65,9 @@ docker compose up --build -d
 - 📦 **Modelos preentrenados**: [https://drive.google.com/drive/folders/1znXEIR6sPuR8oprElCuK32V6d7o2L1AJ?usp=sharing] Estos modelos deben incluirse en ```video_analysis/models```
 - 📁 **Repositorio**: [https://github.com/josmarsua/TFG](https://github.com/josmarsua/TFG)
 - 📄 **Memoria del proyecto**: *(enlace por definir)*
-- 🎥 **Vídeo demo**: *(por añadir)*
+- 🎥 **Vídeo demo**:
+![capturademo](https://www.youtube.com/watch?v=n4v1BjWUU1c&ab_channel=Jos%C3%A9Mart%C3%ADnezSu%C3%A1rez)
+
 
 
 
