@@ -20,18 +20,18 @@ Tactical and statistical analysis in professional basketball typically relies on
 <table>
   <tr>
     <td>
-      ![vistapaginaprincipal](https://github.com/user-attachments/assets/fce9dc75-f036-41d1-999b-20853d0151e3)
+      ![vistapaginaprincipal](https://github.com/user-attachments/assets/acaf248d-2fa8-4d6b-96f4-640d5b7e1abb)
     </td>
     <td>
-      ![vistaregister](https://github.com/user-attachments/assets/3854daf5-42a8-48bf-995f-7467074eaaa2)
+      ![vistaregister](https://github.com/user-attachments/assets/69cd59d9-a5c1-4797-9718-8f8a7a305762)
     </td>
   </tr>
   <tr>
     <td>
-      ![vistadashboard](https://github.com/user-attachments/assets/4f44a562-91d4-497c-b11b-caf36f91c3aa)
+      ![vistadashboard](https://github.com/user-attachments/assets/5f1a9e41-9098-458e-832d-bf995952d626)
     </td>
     <td>
-      ![vistaprocess](https://github.com/user-attachments/assets/1e94f6be-f212-4965-8ff1-3809fbce1caa)
+      ![vistaprocess](https://github.com/user-attachments/assets/b9a1114f-5f2c-46ce-aea1-523a065857ef)
     </td>
   </tr>
 </table>
