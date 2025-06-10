@@ -17,10 +17,24 @@ Tactical and statistical analysis in professional basketball typically relies on
 - 🏀 **Detección de eventos clave (tiros, pases)**
 - 📐 **Homografía y proyección a vista táctica** utilizando homografía y transformación de perspectiva
 - 🎨 **Generación de vídeo final anotado**
-![vistapaginaprincipal](https://github.com/user-attachments/assets/fce9dc75-f036-41d1-999b-20853d0151e3)
-![vistaregister](https://github.com/user-attachments/assets/3854daf5-42a8-48bf-995f-7467074eaaa2)
-![vistadashboard](https://github.com/user-attachments/assets/4f44a562-91d4-497c-b11b-caf36f91c3aa)
-![vistaprocess](https://github.com/user-attachments/assets/1e94f6be-f212-4965-8ff1-3809fbce1caa)
+<table>
+  <tr>
+    <td>
+      ![vistapaginaprincipal](https://github.com/user-attachments/assets/fce9dc75-f036-41d1-999b-20853d0151e3)
+    </td>
+    <td>
+      ![vistaregister](https://github.com/user-attachments/assets/3854daf5-42a8-48bf-995f-7467074eaaa2)
+    </td>
+  </tr>
+  <tr>
+    <td>
+      ![vistadashboard](https://github.com/user-attachments/assets/4f44a562-91d4-497c-b11b-caf36f91c3aa)
+    </td>
+    <td>
+      ![vistaprocess](https://github.com/user-attachments/assets/1e94f6be-f212-4965-8ff1-3809fbce1caa)
+    </td>
+  </tr>
+</table>
 
 ---
 
